@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 8
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "com.liujh168.jqmq"
-        minSdkVersion 24
-        targetSdkVersion 27
+        minSdkVersion 7
+        targetSdkVersion 8
     }
 
     buildTypes {

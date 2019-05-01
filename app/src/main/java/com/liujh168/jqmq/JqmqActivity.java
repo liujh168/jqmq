@@ -1,8 +1,5 @@
 package com.liujh168.jqmq;
-
 import static android.content.ContentValues.TAG;
-import static com.liujh168.jqmq.ViewConstant.*;
-
 import java.util.HashMap;
 import android.app.Activity;
 import android.content.Context;
@@ -15,25 +12,48 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Button;
 
 public class JqmqActivity extends Activity {
-
+    Button btn;
+    TextView txt;
+    ImageView imgBoard;
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-		
+    protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-      
-	  //设置全屏显示
-        requestWindowFeature(Window.FEATURE_NO_TITLE); 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-      
-	  //设置横屏模式
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.mainlayout);
+        btn =  (Button) findViewById(R.id.btnstart);
+        txt =  (TextView) findViewById(R.id.txtInfo);
+        imgBoard = (ImageView) findViewById(R.id.imgBoard);
 
-		Log.d("JqmqActivity", "onCreate: 这里打印调试信息！");
-		
+        Log.d("JqmqActivity", "onCreate: from JqmqActivity");
+        btn.setOnClickListener(new View.OnClickListener() {
+                                   @Override
+                                   public void onClick(View view) {
+                                       txt.setText("Btn Click Message!");
+                                   }
+                               }
 
+        );
+        imgBoard.setOnClickListener(new View.OnClickListener() {
+                                   @Override
+                                   public void onClick(View view) {
+                                       txt.setText(R.string.app_name);
+                                   }
+                               }
+
+        );
+    }
+
+    public void onbtnclick(View v){
+        Toast.makeText(this, R.string.clickmessage,Toast.LENGTH_LONG).show();
+        txt.setText("btn Click Message!");
     }
 }
+
