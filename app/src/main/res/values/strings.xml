@@ -66,5 +66,5 @@
     <string name="msdk_name_auth_login">登录游戏</string>
     <string name="msdk_name_auth_progress_msg">提交中请稍后……</string>
     <string name="clickmessage">you click me!</string>
-    <string name="wokao">我靠，下盲棋！</string>
+    <string name="wokao">哇噻，下盲棋！</string>
 </resources>
