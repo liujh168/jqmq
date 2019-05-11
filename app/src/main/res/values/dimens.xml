@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+//定义棋盘尺寸
+-->
+<resources>
+    <dimen name="board_size_width">500dp</dimen>
+    <dimen name="board_size_hight">800dp</dimen>
+    <dimen name="piece_size_width">52dp</dimen>
+    <dimen name="piece_size_hight">52dp</dimen>
+
+    <dimen name="btn_margin_left">50dp</dimen>
+    <dimen name="btn_margin_top">10dp</dimen>
+</resources>

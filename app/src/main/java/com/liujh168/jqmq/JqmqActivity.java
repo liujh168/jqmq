@@ -53,10 +53,11 @@ public class JqmqActivity extends Activity {
                     setContentView(R.layout.mainlayout);
                     btn =  (Button) findViewById(R.id.btnstart);
                     txt =  (TextView) findViewById(R.id.txtInfo);
+                    //imgBoard=(ImageView) findViewById(R.id.imgBoard);
                     btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                txt.setText(R.string.notice_web_failed);
+                                txt.setText(R.string.btn_txt_auth_agreement_ok);
                                 txt.refreshDrawableState();
                                 try {
                                     Thread.sleep(50);
@@ -82,16 +83,16 @@ public class JqmqActivity extends Activity {
         setContentView(R.layout.mainlayout);
         btn =  (Button) findViewById(R.id.btnstart);
         txt =  (TextView) findViewById(R.id.txtInfo);
-        imgBoard = (ImageView) findViewById(R.id.imgBoard);
+        //imgBoard = (ImageView) findViewById(R.id.imgBoard);
 
         currentLogo = BitmapFactory.decodeResource(this.getResources(), R.drawable.brothers);
-        currentLogo = scaleToFit(currentLogo,1f);
+        currentLogo = scaleToFit(currentLogo,1.6f);
 
         Log.d("JqmqActivity", "onCreate: from JqmqActivity");
         btn.setOnClickListener(new View.OnClickListener() {
                                    @Override
                                    public void onClick(View view) {
-                                       txt.setText(R.string.clickmessage);
+                                       txt.setText(R.string.wokao);
                                        setContentView(new MyView(JqmqActivity.this));
                                    }
                                }
