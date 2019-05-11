@@ -22,11 +22,12 @@
 * 用户可根据自己的喜好自由选择电脑方或远程对手。
 
 # 3 Android开发环境配置
-本系统在Windows 7操作系统 Android Studio开发环境下设计实现，涉及到的主要软件组合如下：JDK、Android SDK、Gradle及Android模拟器。以下是简单的安装设置步骤（用于备忘）：
+本系统在Windows 7操作系统 Android Studio开发环境下设计实现，涉及到的主要软件组合如下：JDK、Android SDK、Gradle及Android模拟器(用genymotion比较快)。以下是简单的安装设置步骤（用于备忘）：
 1. 安装JDK
 2. 安装SDK
 3. Android Studio安装配置
 4. Android版本配置
+5. Genymotion注册安装
 
 # 4功能设计与实现
 4.1 Android系统组件使用情况
@@ -41,4 +42,4 @@
 * 利用云服务器，增加远程盲棋对弈功能（1 vs N），训练之余增加娱乐性与提高实战对弈能力。
 * 利用深度学习算法训练自己的语音识别系统，减少外界依赖（这个技术有点难，学习中）。
 
-有兴趣者加入者，到这里看看。
+有兴趣者加入者，请联系 QQ 77156973。
