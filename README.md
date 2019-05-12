@@ -32,9 +32,10 @@
 # 4功能设计与实现
 4.1 Android系统组件使用情况
 4.2 主要功能类介绍
-* 1.Controller
-* 2.Views
-* 3.Modules
+* 1.Controller 定制activity
+* 2.Views   开发自定义GameView类用于下棋介面
+* 3.Modules 棋局业务逻辑整合了象棋小巫师applet部分代码
+* 4.
 
 # 5改进与优化
 * 训练进度储存与恢复。
