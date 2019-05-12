@@ -5,20 +5,31 @@
     android:layout_height="match_parent">
 
     <!--棋盘-->
-    <ImageView
-        android:id="@+id/imgBoard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/btn_margin_top"
-        android:src="@drawable/board" />
+    <!--<ImageView-->
+        <!--android:id="@+id/imgBoard"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="1"-->
+        <!--android:layout_marginTop="@dimen/btn_margin_top"-->
+        <!--android:src="@drawable/board" />-->
 
     <!--自定义棋盘View-->
-    <!--<com.liujh168.jqmq.GameView-->
-        <!--android:id="@+id/gameview"-->
-        <!--android:layout_width="222dp"-->
-        <!--android:layout_height="133dp"-->
-        <!--android:layout_marginLeft="@dimen/btn_margin_left"-->
-        <!--android:visibility="visible" />-->
+    <com.liujh168.jqmq.GameView
+        android:id="@+id/gameview"
+        android:layout_width = "match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/btn_margin_top"
+        android:layout_weight="1"/>
+
+    <EditText
+        android:id="@+id/edtInfofen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/btn_margin_left"
+        android:layout_marginRight="@dimen/btn_margin_right"
+        android:hint="@string/txt_hint_fen"
+        android:inputType="text"
+        android:text="@string/txt_fen" />
 
     <!--第一排按钮-->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,25 +41,27 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnnew"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_txt_new" />
-        <Button
             android:id="@+id/btnstart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_start" />
         <Button
-            android:id="@+id/btnhidepiece"
+            android:id="@+id/btnopen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_hidepiece" />
+            android:text="@string/btn_txt_open" />
         <Button
-            android:id="@+id/btnhideboard"
+            android:id="@+id/btnpieceread"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_hideboard" />
+            android:text="@string/btn_txt_board_read" />
+
+        <Button
+            android:id="@+id/btnshowboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_txt_showboard" />
+
         <Button
             android:id="@+id/btnsettings"
             android:layout_width="wrap_content"
@@ -62,27 +75,23 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginLeft="@dimen/btn_margin_left"
-        android:layout_marginTop="@dimen/btn_margin_top"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnopen"
+            android:id="@+id/btnnew"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_open" />
-
+            android:text="@string/btn_txt_new" />
         <Button
             android:id="@+id/btnsave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_save" />
-
         <Button
             android:id="@+id/btnread"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_read" />
-
+            android:text="@string/btn_txt_piece_read" />
         <Button
             android:id="@+id/btnsound"
             android:layout_width="wrap_content"
@@ -97,9 +106,4 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/wokao" />
 </LinearLayout>

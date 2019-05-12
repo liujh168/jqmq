@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,9 +44,11 @@ import android.view.SurfaceView;
 
 public class JqmqActivity extends Activity {
     Button btn;
-    TextView txt;
+    EditText fen;
     Bitmap currentLogo;  //当前logo图片引用
-    ImageView imgBoard;
+    SoundPool soundPool;//声音池
+    HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView imgBoard;
+
     Handler hd = new Handler(){
         @Override
         public void handleMessage(Message msg)
@@ -55,13 +58,13 @@ public class JqmqActivity extends Activity {
                 case 0:
                     setContentView(R.layout.mainlayout);
                     btn =  (Button) findViewById(R.id.btnstart);
-                    txt =  (TextView) findViewById(R.id.txtInfo);
-                    imgBoard=(ImageView) findViewById(R.id.imgBoard);
+                    fen =  (EditText) findViewById(R.id.edtInfofen);
+                    //imgBoard=(ImageView) findViewById(R.id.imgBoard);
                     btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                txt.setText(R.string.btn_txt_auth_agreement_ok);
-                                txt.refreshDrawableState();
+                                fen.setText(R.string.txt_fen);
+                                fen.refreshDrawableState();
                                 try {
                                     Thread.sleep(50);
                                 } catch (Exception e)//抛出异常
@@ -87,27 +90,20 @@ public class JqmqActivity extends Activity {
         setContentView(R.layout.mainlayout);
 
         btn =  (Button) findViewById(R.id.btnstart);
-        txt =  (TextView) findViewById(R.id.txtInfo);
-        imgBoard = (ImageView) findViewById(R.id.imgBoard);
+        fen =  (EditText) findViewById(R.id.edtInfofen);
+        //imgBoard = (ImageView) findViewById(R.id.imgBoard);
 
         currentLogo = BitmapFactory.decodeResource(this.getResources(), R.drawable.brothers);
         currentLogo = scaleToFit(currentLogo,1.6f);
+        initPm();
+        initSound();
 
         Log.d("JqmqActivity", "onCreate: from JqmqActivity");
         btn.setOnClickListener(new View.OnClickListener() {
                                    @Override
                                    public void onClick(View view) {
-                                       txt.setText(R.string.wokao);
+                                       fen.setText(R.string.wokao);
                                        setContentView(new MyView(JqmqActivity.this));
-                                   }
-                               }
-
-        );
-
-        imgBoard.setOnClickListener(new View.OnClickListener() {
-                                   @Override
-                                   public void onClick(View view) {
-                                       txt.setText(R.string.app_name);
                                    }
                                }
 
@@ -141,11 +137,14 @@ public class JqmqActivity extends Activity {
 
     public static Bitmap scaleToFit(Bitmap bm,float fblRatio)//缩放图片的方法
     {
-        int width = bm.getWidth(); //图片宽度
-        int height = bm.getHeight();//图片高度
-        Matrix matrix = new Matrix();
-        matrix.postScale((float)fblRatio, (float)fblRatio);//图片等比例缩小为原来的fblRatio倍
-        return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);//声明位图
+        if(bm!=null){
+            int width = bm.getWidth(); //图片宽度
+            int height = bm.getHeight();//图片高度
+            Matrix matrix = new Matrix();
+            matrix.postScale((float)fblRatio, (float)fblRatio);//图片等比例缩小为原来的fblRatio倍
+            return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);//声明位图
+        }
+        return null;
     }
 
     private  class MyView extends SurfaceView implements SurfaceHolder.Callback
@@ -222,5 +221,64 @@ public class JqmqActivity extends Activity {
                 activity.hd.sendEmptyMessage(0);//发送消息，开始加载棋子模型
             }
         }
+    }
+
+    public void initPm()
+    {
+        //获取屏幕分辨率
+        DisplayMetrics dm=new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        //前面代码放入oncreate,后面的放入GameView
+        int tempHeight=(int) (GameView.height=dm.heightPixels);
+        int tempWidth=(int) (GameView.width=dm.widthPixels);
+        if(tempHeight>tempWidth)
+        {
+            GameView.height=tempHeight;
+            GameView.width=tempWidth;
+        }
+        else
+        {
+            GameView.height=tempWidth;
+            GameView.width=tempHeight;
+        }
+
+        float zoomx= GameView.width/560;
+        float zoomy= GameView.height/646;
+        if(zoomx>zoomy){
+            GameView.xZoom= GameView.yZoom=zoomy;
+
+        }else
+        {
+            GameView.xZoom= GameView.yZoom=zoomx;
+        }
+
+        GameView.sXtart=(GameView.width-560* GameView.xZoom)/2;
+        GameView.sYtart=(GameView.height-640* GameView.yZoom)/2;
+        GameView.initChessViewFinal();
+    }
+
+    public void initSound()
+    {
+        //声音池
+        soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+        soundPoolMap = new HashMap<Integer, Integer>();
+
+        soundPoolMap.put(1, soundPool.load(this, R.raw.capture, 1));//背景音乐
+        soundPoolMap.put(2, soundPool.load(this, R.raw.move, 1)); //玩家走棋
+        soundPoolMap.put(4, soundPool.load(this, R.raw.win, 1)); //赢了
+        soundPoolMap.put(5, soundPool.load(this, R.raw.loss, 1)); //输了
+    }
+    //播放声音
+    public void playSound(int sound, int loop)
+    {
+        if(!GameView.isnoPlaySound)
+        {
+            return;
+        }
+        AudioManager mgr = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        float streamVolumeCurrent = mgr.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float streamVolumeMax = mgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float volume = streamVolumeCurrent / streamVolumeMax;
+        soundPool.play(soundPoolMap.get(sound), volume, volume, 1, loop, 1f);
     }
 }

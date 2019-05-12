@@ -3,23 +3,28 @@
     <string name="app_name">下盲棋</string>
     <string name="title_name">中国象棋盲棋辅助训练系统</string>
     <string name="wokao">哇噻，下盲棋！</string>
-    <string name="message">you click me!</string>
+    <string name="txt_fen">这里可以显示或输入Fen串</string>
+    <string name="txt_message">you click me!</string>
+    <string name="txt_hint_fen">这里可以输入标准的fen串</string>
 
     <string name="btn_txt_new">新局</string>
     <string name="btn_txt_start">开始</string>
     <string name="btn_txt_pause">暂停</string>
+    <string name="btn_txt_showpiece">显示棋子</string>
     <string name="btn_txt_hidepiece">隐藏棋子</string>
+    <string name="btn_txt_showboard">显示棋盘</string>
     <string name="btn_txt_hideboard">隐藏棋盘</string>
     <string name="btn_txt_settings">设置</string>
     <string name="btn_txt_exit">退出</string>
-
     <string name="btn_txt_open">载入</string>
     <string name="btn_txt_save">保存</string>
-    <string name="btn_txt_read">朗读棋谱</string>
+    <string name="btn_txt_piece_read">朗读棋盘</string>
+    <string name="btn_txt_board_read">朗读棋谱</string>
     <string name="btn_txt_sound">背景音乐</string>
-
     <string name="menu_file_open">打开棋谱</string>
     <string name="menu_file_save">保存棋谱</string>
+
+    <string name="txt_info_working">正在努力开发之中</string>
 
     <string name="msdk_upload_file_title">上传文件</string>
     <string name="btn_txt_dlg_title">温馨提示</string>
@@ -29,22 +34,7 @@
     <string name="btn_txt_submit">确定</string>
     <string name="btn_txt_network_not_connected">您未连接网络，请检查网络!</string>
     <string name="btn_txt_server_error">当前服务不可用，请稍后重试!</string>
-    <string name="btn_txt_negtive_known">我知道了!</string>
     <string name="btn_txt_positive_retry_again">立即重试</string>
     <string name="btn_txt_network_error">网络异常，请稍后重试!</string>
 
-    <string name="btn_txt_auth_name">姓名</string>
-    <string name="btn_txt_auth_realname_title">实名注册</string>
-    <string name="btn_txt_auth_identity_type">选择有效证件类型</string>
-    <string name="btn_txt_auth_identity_num">有效证件号码</string>
-    <string name="btn_txt_auth_back">返回游戏</string>
-    <string name="btn_txt_auth_commit">提交注册</string>
-    <string name="btn_txt_auth_agreement_ok">同意</string>
-    <string name="btn_txt_auth_fail">注册失败</string>
-    <string name="btn_txt_auth_success">注册成功</string>
-    <string name="btn_txt_auth_success_des">"您的账号实名注册成功! 您现在可以登录游戏。"</string>
-    <string name="btn_txt_auth_qq">联系客服</string>
-    <string name="btn_txt_auth_tryagain">重新输入</string>
-    <string name="btn_txt_auth_login">登录游戏</string>
-    <string name="btn_txt_auth_progress_msg">提交中请稍后……</string>
 </resources>
