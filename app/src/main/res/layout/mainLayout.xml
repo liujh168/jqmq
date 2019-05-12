@@ -5,20 +5,20 @@
     android:layout_height="match_parent">
 
     <!--棋盘-->
-    <!--<ImageView-->
-        <!--android:id="@+id/imgBoard"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="150dp"-->
-        <!--android:layout_marginTop="@dimen/btn_margin_top"-->
-        <!--android:src="@drawable/board" />-->
+    <ImageView
+        android:id="@+id/imgBoard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/btn_margin_top"
+        android:src="@drawable/board" />
 
     <!--自定义棋盘View-->
-    <com.liujh168.jqmq.GameView
-        android:id="@+id/gameview"
-        android:layout_width="222dp"
-        android:layout_height="133dp"
-        android:layout_marginLeft="@dimen/btn_margin_left"
-        android:visibility="visible" />
+    <!--<com.liujh168.jqmq.GameView-->
+        <!--android:id="@+id/gameview"-->
+        <!--android:layout_width="222dp"-->
+        <!--android:layout_height="133dp"-->
+        <!--android:layout_marginLeft="@dimen/btn_margin_left"-->
+        <!--android:visibility="visible" />-->
 
     <!--第一排按钮-->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menufileopen"
+        android:title="@string/menu_file_open"/>
+    <item
+        android:id="@+id/menufilesave"
+        android:title="@string/menu_file_save"/>
+    <item
+        android:id="@+id/menu_sys_set"
+        android:title="@string/btn_txt_settings"/>
+    android:enabled="false"
+</menu>

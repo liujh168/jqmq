@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
-
 android {
-    compileSdkVersion 8
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 23
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.liujh168.jqmq"
@@ -16,4 +15,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+}
+
+dependencies {
 }

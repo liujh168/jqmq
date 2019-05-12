@@ -14,6 +14,9 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -53,7 +56,7 @@ public class JqmqActivity extends Activity {
                     setContentView(R.layout.mainlayout);
                     btn =  (Button) findViewById(R.id.btnstart);
                     txt =  (TextView) findViewById(R.id.txtInfo);
-                    //imgBoard=(ImageView) findViewById(R.id.imgBoard);
+                    imgBoard=(ImageView) findViewById(R.id.imgBoard);
                     btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -80,10 +83,12 @@ public class JqmqActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
         setContentView(R.layout.mainlayout);
+
         btn =  (Button) findViewById(R.id.btnstart);
         txt =  (TextView) findViewById(R.id.txtInfo);
-        //imgBoard = (ImageView) findViewById(R.id.imgBoard);
+        imgBoard = (ImageView) findViewById(R.id.imgBoard);
 
         currentLogo = BitmapFactory.decodeResource(this.getResources(), R.drawable.brothers);
         currentLogo = scaleToFit(currentLogo,1.6f);
@@ -107,6 +112,31 @@ public class JqmqActivity extends Activity {
                                }
 
         );
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menufileopen:
+                Toast.makeText(this, R.string.menu_file_open, Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menufilesave:
+                Toast.makeText(this,  R.string.menu_file_save, Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menu_sys_set:
+                Toast.makeText(this,  R.string.btn_txt_settings, Toast.LENGTH_LONG).show();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
     }
 
     public static Bitmap scaleToFit(Bitmap bm,float fblRatio)//缩放图片的方法

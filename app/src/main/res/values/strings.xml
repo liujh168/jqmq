@@ -18,6 +18,9 @@
     <string name="btn_txt_read">朗读棋谱</string>
     <string name="btn_txt_sound">背景音乐</string>
 
+    <string name="menu_file_open">打开棋谱</string>
+    <string name="menu_file_save">保存棋谱</string>
+
     <string name="msdk_upload_file_title">上传文件</string>
     <string name="btn_txt_dlg_title">温馨提示</string>
     <string name="btn_txt_title">你暂时没有体验资格</string>
