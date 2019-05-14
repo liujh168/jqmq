@@ -43,9 +43,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class JqmqActivity extends Activity {
+    float screenHeight;
+    float screenWidth;
+    float ration;
     Button btn;
     EditText fen;
-    Bitmap currentLogo;  //当前logo图片引用
+    Bitmap imgWelcome;  //当前logo图片引用
     SoundPool soundPool;//声音池
     HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView imgBoard;
 
@@ -56,25 +59,7 @@ public class JqmqActivity extends Activity {
             switch(msg.what)
             {
                 case 0:
-                    setContentView(R.layout.mainlayout);
-                    btn =  (Button) findViewById(R.id.btnstart);
-                    fen =  (EditText) findViewById(R.id.edtInfofen);
-                    //imgBoard=(ImageView) findViewById(R.id.imgBoard);
-                    btn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                fen.setText(R.string.txt_fen);
-                                fen.refreshDrawableState();
-                                try {
-                                    Thread.sleep(50);
-                                } catch (Exception e)//抛出异常
-                                {
-                                    e.printStackTrace();
-                                }
-                                setContentView(new MyView(JqmqActivity.this));  //再次回来时
-                            }
-                        }
-                    );
+                    gotoGameview();
                     break;
                 case 1:
                     break;
@@ -87,27 +72,18 @@ public class JqmqActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.mainlayout);
+        //获取屏幕分辨率
+        DisplayMetrics dm=new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenHeight=dm.heightPixels;
+        screenWidth=dm.widthPixels;
 
-        btn =  (Button) findViewById(R.id.btnstart);
-        fen =  (EditText) findViewById(R.id.edtInfofen);
-        //imgBoard = (ImageView) findViewById(R.id.imgBoard);
-
-        currentLogo = BitmapFactory.decodeResource(this.getResources(), R.drawable.brothers);
-        currentLogo = scaleToFit(currentLogo,1.6f);
-        initPm();
+        imgWelcome = BitmapFactory.decodeResource(this.getResources(), R.drawable.board);
+        imgWelcome = scaleToFit(imgWelcome,screenHeight/imgWelcome.getHeight());
+        initScreenSize(screenWidth,screenHeight);
         initSound();
 
-        Log.d("JqmqActivity", "onCreate: from JqmqActivity");
-        btn.setOnClickListener(new View.OnClickListener() {
-                                   @Override
-                                   public void onClick(View view) {
-                                       fen.setText(R.string.wokao);
-                                       setContentView(new MyView(JqmqActivity.this));
-                                   }
-                               }
-
-        );
+        setContentView(new WelcomeView(JqmqActivity.this));
     }
 
     @Override
@@ -147,14 +123,14 @@ public class JqmqActivity extends Activity {
         return null;
     }
 
-    private  class MyView extends SurfaceView implements SurfaceHolder.Callback
+    private  class WelcomeView extends SurfaceView implements SurfaceHolder.Callback
     {
         SurfaceHolder myholder;
         Paint mPaint;
         int currentAlpha;  			//当前的不透明值
         JqmqActivity activity;
 
-        public MyView(JqmqActivity acti) {
+        public WelcomeView(JqmqActivity acti) {
             super(acti);
             this.activity=acti;
             currentAlpha=255;
@@ -163,26 +139,16 @@ public class JqmqActivity extends Activity {
             myholder.addCallback(this);
         }
 
-        public void brawboard(Canvas canvas)
-        {
-            //绘制黑填充矩形清背景
-            mPaint.setColor(Color.BLACK);//设置画笔颜色
-            mPaint.setAlpha(255);       //设置不透明度为255
-            canvas.drawRect(0, 0, 1200, 1300, mPaint);//画个矩形
-            mPaint.setAlpha(currentAlpha);
-            if(currentLogo!=null) {
-                canvas.drawBitmap(currentLogo, 0, 0, mPaint);
-            }
-        }
-
         //以下实现surface生命周期3个回调函数
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             new Thread(new MyThread()).start();
         }
+
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         }
+
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
         }
@@ -196,8 +162,16 @@ public class JqmqActivity extends Activity {
                     try {
                         synchronized (myholder)//同步
                         {
+                            mPaint.setColor(Color.BLACK);//设置画笔颜色
+                            mPaint.setAlpha(255);       //设置不透明度为255
+                            canvas.drawRect(0, 0, screenWidth, screenHeight, mPaint);////绘制黑填充矩形清背景
+                            mPaint.setAlpha(currentAlpha);
                             //动态更改图片的透明度值并不断重绘
-                            brawboard(canvas);//进行绘制绘制
+                            if(imgWelcome!=null) {
+                                int curX=(int) (screenWidth/2-imgWelcome.getWidth()/2);//图片位置
+                                int curY=(int) (screenHeight/2-imgWelcome.getHeight()/2);
+                                canvas.drawBitmap(imgWelcome, curX, curY, mPaint);
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -223,38 +197,21 @@ public class JqmqActivity extends Activity {
         }
     }
 
-    public void initPm()
+    public void initScreenSize(float w , float h)  //更新自定义view中屏幕尺寸
     {
-        //获取屏幕分辨率
-        DisplayMetrics dm=new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
         //前面代码放入oncreate,后面的放入GameView
-        int tempHeight=(int) (GameView.height=dm.heightPixels);
-        int tempWidth=(int) (GameView.width=dm.widthPixels);
+        int tempWidth=(int) (GameView.screen_width=w);
+        int tempHeight=(int) (GameView.screen_height=h);
         if(tempHeight>tempWidth)
         {
-            GameView.height=tempHeight;
-            GameView.width=tempWidth;
+            GameView.screen_height=tempHeight;
+            GameView.screen_width=tempWidth;
         }
         else
         {
-            GameView.height=tempWidth;
-            GameView.width=tempHeight;
+            GameView.screen_height=tempWidth;
+            GameView.screen_width=tempHeight;
         }
-
-        float zoomx= GameView.width/560;
-        float zoomy= GameView.height/646;
-        if(zoomx>zoomy){
-            GameView.xZoom= GameView.yZoom=zoomy;
-
-        }else
-        {
-            GameView.xZoom= GameView.yZoom=zoomx;
-        }
-
-        GameView.sXtart=(GameView.width-560* GameView.xZoom)/2;
-        GameView.sYtart=(GameView.height-640* GameView.yZoom)/2;
-        GameView.initChessViewFinal();
     }
 
     public void initSound()
@@ -280,5 +237,22 @@ public class JqmqActivity extends Activity {
         float streamVolumeMax = mgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         float volume = streamVolumeCurrent / streamVolumeMax;
         soundPool.play(soundPoolMap.get(sound), volume, volume, 1, loop, 1f);
+    }
+
+    public void gotoGameview()
+    {
+        setContentView(R.layout.mainlayout);
+        btn =  (Button) findViewById(R.id.btnstart);
+        fen =  (EditText) findViewById(R.id.edtInfofen);
+        //imgBoard=(ImageView) findViewById(R.id.imgBoard);
+        btn.setOnClickListener(new View.OnClickListener() {
+                                   @Override
+                                   public void onClick(View view) {
+                                       fen.setText(R.string.wokao);
+                                       //setContentView(new WelcomeView(JqmqActivity.this));
+                                   }
+                               }
+
+        );
     }
 }

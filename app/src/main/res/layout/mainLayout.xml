@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:jqmq="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <!--棋盘-->
-    <!--<ImageView-->
-        <!--android:id="@+id/imgBoard"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:layout_marginTop="@dimen/btn_margin_top"-->
-        <!--android:src="@drawable/board" />-->
+    android:layout_height="match_parent"
+    android:background="@drawable/field"
+    android:orientation="vertical">
 
     <!--自定义棋盘View-->
     <com.liujh168.jqmq.GameView
         android:id="@+id/gameview"
-        android:layout_width = "match_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/btn_margin_top"
-        android:layout_weight="1"/>
+        android:background="#ff0000"
+        jqmq:boardbg="#ff0000"
+        jqmq:boarddd="56"
+        jqmq:boardline="#0000ee"
+        jqmq:boardox="53"
+        jqmq:boardoy="71"
+        jqmq:fen="@string/start_fen" />
 
     <EditText
         android:id="@+id/edtInfofen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/btn_margin_left"
-        android:layout_marginRight="@dimen/btn_margin_right"
         android:hint="@string/txt_hint_fen"
         android:inputType="text"
-        android:text="@string/txt_fen" />
+        android:lines="1" />
 
     <!--第一排按钮-->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         android:layout_marginLeft="@dimen/btn_margin_left"
         android:layout_marginTop="@dimen/btn_margin_top"
         android:orientation="horizontal">
@@ -45,11 +40,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_start" />
+
         <Button
             android:id="@+id/btnopen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_open" />
+
         <Button
             android:id="@+id/btnpieceread"
             android:layout_width="wrap_content"
@@ -71,9 +68,8 @@
 
     <!--第二排按钮-->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
         android:layout_marginLeft="@dimen/btn_margin_left"
         android:orientation="horizontal">
 
@@ -82,16 +78,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_new" />
+
         <Button
             android:id="@+id/btnsave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_save" />
+
         <Button
             android:id="@+id/btnread"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_piece_read" />
+
         <Button
             android:id="@+id/btnsound"
             android:layout_width="wrap_content"
@@ -103,7 +102,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_exit" />
-
     </LinearLayout>
-
 </LinearLayout>

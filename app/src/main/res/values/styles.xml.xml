@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <declare-styleable name="GameView">
+            <!--棋盘fen串-->
+            <attr name="fen" format = "string" />
+            <!--棋盘图像大小-->
+            <attr name="boardw" format = "integer" />
+            <attr name="boardh" format = "integer" />
+            <!--棋盘左上角位置，相对于棋盘图像-->
+            <attr name="boardox" format = "integer" />
+            <attr name="boardoy" format = "integer" />
+            <!--棋盘格大小-->
+            <attr name="boarddd" format = "integer" />
+            <!--棋盘背景色-->
+            <attr name="boardbg" format = "color" />
+            <!--棋盘线颜色-->
+            <attr name="boardline" format = "color" />
+            <!--控制棋盘棋子是否显示-->
+            <attr name="isVisible" format = "integer" />
+        </declare-styleable>
+</resources>
