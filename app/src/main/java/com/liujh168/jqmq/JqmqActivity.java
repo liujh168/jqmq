@@ -1,5 +1,7 @@
 package com.liujh168.jqmq;
 import static android.content.ContentValues.TAG;
+import static java.lang.Thread.sleep;
+
 import java.util.HashMap;
 import android.app.Activity;
 import android.content.Context;
@@ -46,11 +48,11 @@ public class JqmqActivity extends Activity {
     float screenHeight;
     float screenWidth;
     float ration;
-    Button btn;
+    Button btnShowPiece;
     EditText fen;
     Bitmap imgWelcome;  //当前logo图片引用
     SoundPool soundPool;//声音池
-    HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView imgBoard;
+    HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView gameView;
 
     Handler hd = new Handler(){
         @Override
@@ -70,17 +72,17 @@ public class JqmqActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
 
         //获取屏幕分辨率
-        DisplayMetrics dm=new DisplayMetrics();
+        DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
-        screenHeight=dm.heightPixels;
-        screenWidth=dm.widthPixels;
+        screenHeight = dm.heightPixels;
+        screenWidth = dm.widthPixels;
 
-        imgWelcome = BitmapFactory.decodeResource(this.getResources(), R.drawable.board);
-        imgWelcome = scaleToFit(imgWelcome,screenHeight/imgWelcome.getHeight());
-        initScreenSize(screenWidth,screenHeight);
+        imgWelcome = BitmapFactory.decodeResource(this.getResources(), R.drawable.welcome);
+        imgWelcome = scaleToFit(imgWelcome, screenWidth / imgWelcome.getWidth());
+        initScreenSize(screenWidth, screenHeight);
         initSound();
 
         setContentView(new WelcomeView(JqmqActivity.this));
@@ -168,7 +170,7 @@ public class JqmqActivity extends Activity {
                             mPaint.setAlpha(currentAlpha);
                             //动态更改图片的透明度值并不断重绘
                             if(imgWelcome!=null) {
-                                int curX=(int) (screenWidth/2-imgWelcome.getWidth()/2);//图片位置
+                                int curX=(int) (screenWidth/2-imgWelcome.getWidth()/2);//图片位置居中
                                 int curY=(int) (screenHeight/2-imgWelcome.getHeight()/2);
                                 canvas.drawBitmap(imgWelcome, curX, curY, mPaint);
                             }
@@ -184,9 +186,9 @@ public class JqmqActivity extends Activity {
                     try {
                         if (i == 255)//若是新图片，多等待一会
                         {
-                            Thread.sleep(1000);
+                            sleep(1000);
                         }
-                        Thread.sleep(50);
+                        sleep(50);
                     } catch (Exception e)//抛出异常
                     {
                         e.printStackTrace();
@@ -222,11 +224,12 @@ public class JqmqActivity extends Activity {
 
         soundPoolMap.put(1, soundPool.load(this, R.raw.capture, 1));//背景音乐
         soundPoolMap.put(2, soundPool.load(this, R.raw.move, 1)); //玩家走棋
-        soundPoolMap.put(4, soundPool.load(this, R.raw.win, 1)); //赢了
-        soundPoolMap.put(5, soundPool.load(this, R.raw.loss, 1)); //输了
+        soundPoolMap.put(3, soundPool.load(this, R.raw.win, 1)); //赢了
+        soundPoolMap.put(4, soundPool.load(this, R.raw.loss, 1)); //输了
+        soundPoolMap.put(5, soundPool.load(this, R.raw.classic, 1)); //听听mid
     }
     //播放声音
-    public void playSound(int sound, int loop)
+    public  void playSound(int sound, int loop)
     {
         if(!GameView.isnoPlaySound)
         {
@@ -242,17 +245,78 @@ public class JqmqActivity extends Activity {
     public void gotoGameview()
     {
         setContentView(R.layout.mainlayout);
-        btn =  (Button) findViewById(R.id.btnstart);
+        btnShowPiece =  (Button) findViewById(R.id.btnshowpiece);
+        Button btnStart =  (Button) findViewById(R.id.btnstart);
+        Button btnOpen =  (Button) findViewById(R.id.btnopen);
+        Button btnExit =  (Button) findViewById(R.id.btnexit);
+        Button btnSound =  (Button) findViewById(R.id.btnsound);
+        Button btnNew =  (Button) findViewById(R.id.btnnew);
         fen =  (EditText) findViewById(R.id.edtInfofen);
-        //imgBoard=(ImageView) findViewById(R.id.imgBoard);
-        btn.setOnClickListener(new View.OnClickListener() {
-                                   @Override
-                                   public void onClick(View view) {
-                                       fen.setText(R.string.wokao);
-                                       //setContentView(new WelcomeView(JqmqActivity.this));
-                                   }
-                               }
+        final View gameView=(View) findViewById(R.id.gameview);
 
+        btnNew.setOnClickListener(new View.OnClickListener() {
+                                      @Override
+                                      public void onClick(View view) {
+                                          fen.setText(R.string.txt_start_fen);
+                                          btnShowPiece.setText(R.string.btn_txt_hidepiece);
+                                          GameView.pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
+                                          GameView.isvisible=1;
+                                          gameView.invalidate();
+                                          playSound(1,0);
+                                      }
+                                  }
+        );
+
+        btnShowPiece.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                GameView.isvisible = 1-GameView.isvisible;
+                                                if(GameView.isvisible==1){
+                                                    btnShowPiece.setText(R.string.btn_txt_hidepiece);
+                                                }else{
+                                                    btnShowPiece.setText(R.string.btn_txt_showpiece);
+                                                }
+                                                GameView.pos.fromFen("1r1aka3/4n4/4b3b/p1R5p/7r1/3cC1PN1/P3PN2P/4B1C2/4A4/2BAK3c b");
+                                                gameView.invalidate();
+                                                //fen.setText(R.string.txt_info_working);
+                                                playSound(2,0);
+                                            }
+                                        }
+        );
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            fen.setText(R.string.txt_info_working);
+                                            playSound(3,0);
+                                        }
+                                    }
+        );
+
+        btnOpen.setOnClickListener(new View.OnClickListener() {
+                                       @Override
+                                       public void onClick(View view) {
+                                           fen.setText(R.string.wokao);
+                                           playSound(4,0);
+                                       }
+                                   }
+        );
+
+        btnSound.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            fen.setText(R.string.btn_txt_sound);
+                                            playSound(5,0);
+                                        }
+                                    }
+        );
+
+        btnExit.setOnClickListener(new View.OnClickListener() {
+                                       @Override
+                                       public void onClick(View view) {
+                                           finish();
+                                       }
+                                   }
         );
     }
 }

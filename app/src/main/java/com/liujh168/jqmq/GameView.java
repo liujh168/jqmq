@@ -48,6 +48,7 @@ public class GameView extends View {
 
     public static float imgX = (screen_width-boardWidth*xZoom)/2;     //棋盘图像的起始坐标
     public static float imgY = (screen_width-boardHeight*yZoom)/2;
+    public static int isvisible = 0;                                    //控制棋盘棋子是否显示
 
     public static boolean isnoPlaySound = true;//是否播放声音
 
@@ -98,7 +99,7 @@ public class GameView extends View {
 
     private Paint paint;
     volatile boolean thinking;
-    Position pos;
+    public  static Position pos;
     Search search;
     String currentFen;
     String retractFen;
@@ -121,6 +122,7 @@ public class GameView extends View {
         board_width = boardattrs.getInteger(R.styleable.GameView_boardw, 560);//棋盘的大小
         board_height = boardattrs.getInteger(R.styleable.GameView_boardh, 646);
         board_dd = boardattrs.getInteger(R.styleable.GameView_boarddd, 56);
+        isvisible = boardattrs.getInteger(R.styleable.GameView_isVisible, 0);
         currentFen = boardattrs.getString(R.styleable.GameView_fen);
         int boardbg= boardattrs.getColor(R.styleable.GameView_boardbg, Color.RED);
         int boardline = boardattrs.getColor(R.styleable.GameView_boardline, Color.RED);
@@ -162,13 +164,14 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        paint.setColor(Color.RED);
-        canvas.drawCircle(currentX, currentY, 35, paint);
-        paint.setColor(Color.BLUE);
-        canvas.drawCircle(currentX + 50, currentY + 50, 50, paint);
+
+        //        paint.setColor(Color.RED);
+        //        canvas.drawCircle(currentX, currentY, 35, paint);
         canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
-//        canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[8],xZoom),0, 0, null);//显示帅
-        pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
+
+        if(isvisible == 0) return;  //不显示棋子
+
+//        pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
         for (int x = Position.FILE_LEFT; x <= Position.FILE_RIGHT; x++) {
             for (int y = Position.RANK_TOP; y <= Position.RANK_BOTTOM; y++) {
                 int sq = Position.COORD_XY(x, y);
@@ -194,6 +197,7 @@ public class GameView extends View {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 Log.d("TAG", "ACTION_DOWN");
+                //playSound(1,1);
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.d("TAG", "ACTION_MOVE");
@@ -321,8 +325,8 @@ public class GameView extends View {
                 int mv = mvLast;
                 mvLast = search.searchMain(100 << (level << 1));
                 pos.makeMove(mvLast);
-                drawMove(mv);
-                drawMove(mvLast);
+//                drawMove(mv);
+//                drawMove(mvLast);
                 int response = pos.inCheck() ? RESP_CHECK2 :
                         pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
                 if (pos.captured()) {

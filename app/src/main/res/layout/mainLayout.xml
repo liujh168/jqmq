@@ -17,7 +17,7 @@
         jqmq:boardline="#0000ee"
         jqmq:boardox="53"
         jqmq:boardoy="71"
-        jqmq:fen="@string/start_fen" />
+        jqmq:fen="@string/txt_start_fen" />
 
     <EditText
         android:id="@+id/edtInfofen"
@@ -54,10 +54,10 @@
             android:text="@string/btn_txt_board_read" />
 
         <Button
-            android:id="@+id/btnshowboard"
+            android:id="@+id/btnshowpiece"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_showboard" />
+            android:text="@string/btn_txt_showpiece" />
 
         <Button
             android:id="@+id/btnsettings"
