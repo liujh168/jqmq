@@ -4,6 +4,7 @@
     <string name="title_name">中国象棋盲棋辅助训练系统</string>
     <string name="wokao">哇噻，下盲棋！</string>
     <string name="txt_fen">这里可以显示或输入Fen串</string>
+    <string name="start_fen">起始局面Fen串</string>
     <string name="txt_message">you click me!</string>
     <string name="txt_hint_fen">这里可以输入标准的fen串</string>
 

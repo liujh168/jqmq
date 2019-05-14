@@ -1,65 +1,53 @@
 package com.liujh168.jqmq;
 
-import java.util.Stack;
-import java.io.*;
-
 import android.content.Context;
-import android.database.Cursor;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import static android.content.ContentValues.TAG;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Window;
-import android.view.WindowManager;
-import android.app.Activity;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.media.AudioManager;
-import android.media.SoundPool;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Window;
-import android.view.WindowManager;
+
+import com.liujh168.jqmq.Position;
 
 public class GameView extends View {
+    
+    public static float screen_height;         //screen hight，从其它模块得到。不变的参数
+    public static float screen_width;          //screen screen_width
 
-    public static float height;         //screen hight
-    public static float width;          //screen width
-    public static float sXtart = 0;     //棋盘的起始坐标
-    public static float sYtart = 0;
-    public static float xZoom = 1F;     //缩放比例
-    public static float yZoom = 1F;
+    //    原始棋盘图参数，从属性得来
+    public static float board_width = 560f ;            //棋盘的大小
+    public static float board_height = 646f;
+    public static float board_ox = 53.0f ;              //左上角棋子位置（相对于棋盘）
+    public static float board_oy = 71.0f ;
+    private static float board_dd = 56f;                //棋盘格大小
 
-    public static float xSpan = 53.0f * xZoom;
-    public static float ySpan = 71.0f * yZoom;
-    public static float windowWidth = 560 * xZoom;  //窗口的大小
-    public static float windowHeight = 646 * xZoom;
-    private static float SQUARE_SIZE = 56 * xZoom;
+    public static float xZoom = screen_width/board_width;     //要充满屏幕的缩放比例
+    public static float yZoom = screen_height/board_height;
+
+    public static float boardWidth = board_width * xZoom;          //棋盘的大小
+    public static float boardHeight = board_height * yZoom;
+    public static float boardOX = board_ox * xZoom;                 //左上角棋子位置（相对于棋盘）
+    public static float boardOY = board_oy * yZoom;
+    private static float SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
+
+    public static float imgX = (screen_width-boardWidth*xZoom)/2;     //棋盘图像的起始坐标
+    public static float imgY = (screen_width-boardHeight*yZoom)/2;
 
     public static boolean isnoPlaySound = true;//是否播放声音
 
@@ -112,7 +100,8 @@ public class GameView extends View {
     volatile boolean thinking;
     Position pos;
     Search search;
-    String currentFen, retractFen;
+    String currentFen;
+    String retractFen;
     int sqSelected, mvLast;
     boolean flipped;
     int handicap, level, board, pieces, music;
@@ -126,8 +115,27 @@ public class GameView extends View {
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        TypedArray boardattrs = context.obtainStyledAttributes(attrs, R.styleable.GameView);
+        board_ox = boardattrs.getInteger(R.styleable.GameView_boardox, 53);     //左上角棋子位置（相对于棋盘）
+        board_oy = boardattrs.getInteger(R.styleable.GameView_boardoy, 71);
+        board_width = boardattrs.getInteger(R.styleable.GameView_boardw, 560);//棋盘的大小
+        board_height = boardattrs.getInteger(R.styleable.GameView_boardh, 646);
+        board_dd = boardattrs.getInteger(R.styleable.GameView_boarddd, 56);
+        currentFen = boardattrs.getString(R.styleable.GameView_fen);
+        int boardbg= boardattrs.getColor(R.styleable.GameView_boardbg, Color.RED);
+        int boardline = boardattrs.getColor(R.styleable.GameView_boardline, Color.RED);
+        boardattrs.recycle();//TypedArray对象回收
+        Log.d(TAG, "GameView: board_ox="+board_ox);
+        Log.d(TAG, "GameView: board_oy="+board_oy);
+        Log.d(TAG, "GameView: board_dd="+board_dd);
+        Log.d(TAG, "GameView: board_width="+board_width);
+        Log.d(TAG, "GameView: board_height="+board_height);
+        Log.d(TAG, "GameView: board_fen="+currentFen);
+
+        initChessViewFinal();   //更新相关绘图参数
+
         this.paint = new Paint();
-        this.paint.setColor(Color.RED);
+//        this.paint.setColor(boardline);
         this.paint.setStrokeWidth(3);
 
         loadPieces();
@@ -141,20 +149,14 @@ public class GameView extends View {
         int handicap = 0, level = 0, board = 0, pieces = 0, music = 8;
     }
 
-    private void setimgsize(ImageView img) {
-        //设置图片宽高
-        img.setLayoutParams(new ViewGroup.LayoutParams(mWidth, mHight));
-        img.setImageResource(R.drawable.ba);
-        img.setScaleType(ImageView.ScaleType.FIT_CENTER);
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // 解决显示不全的问题
-        int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2, MeasureSpec.AT_MOST);
-        super.onMeasure(widthMeasureSpec, expandSpec);
-        Log.i(TAG, "run: onMeasure");
-        Log.i("宽度", "makeMeasureSpec：" + expandSpec + "测量出来的width" + widthMeasureSpec);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int screen_width = getMySize((int)imgX, widthMeasureSpec);
+        int screen_height = getMySize((int)imgY, heightMeasureSpec);
+        Log.d("测量 GameView","screen_width: " + screen_width + "screen_height: " + screen_height);
+        screen_height = (int)((screen_width/9)*10 + board_dd*0.8f) ;
+        setMeasuredDimension(screen_width, screen_height);
     }
 
     @Override
@@ -164,75 +166,75 @@ public class GameView extends View {
         canvas.drawCircle(currentX, currentY, 35, paint);
         paint.setColor(Color.BLUE);
         canvas.drawCircle(currentX + 50, currentY + 50, 50, paint);
-        canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard,xZoom), 0, 0, null);
+        canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
 //        canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[8],xZoom),0, 0, null);//显示帅
         pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
-		for (int x = Position.FILE_LEFT; x <= Position.FILE_RIGHT; x ++) {
-			for (int y = Position.RANK_TOP; y <= Position.RANK_BOTTOM; y ++) {
-				int sq = Position.COORD_XY(x, y);
-				sq = (flipped ? Position.SQUARE_FLIP(sq) : sq);
-				int pc = pos.squares[sq];
-                float xx = xSpan-50 + (x - Position.FILE_LEFT) * SQUARE_SIZE *1.25f ;
-                float yy = ySpan-50 + (y - Position.RANK_TOP) * SQUARE_SIZE * 1.25f;
-				if (pc > 0) {
-					canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[pc],xZoom+0.2f), xx, yy, null);
-				}
+        for (int x = Position.FILE_LEFT; x <= Position.FILE_RIGHT; x++) {
+            for (int y = Position.RANK_TOP; y <= Position.RANK_BOTTOM; y++) {
+                int sq = Position.COORD_XY(x, y);
+                sq = (flipped ? Position.SQUARE_FLIP(sq) : sq);
+                int pc = pos.squares[sq];
+                float xx = boardOX + (x - Position.FILE_LEFT) * SQUARE_SIZE ;
+                float yy = boardOY + (y - Position.RANK_TOP) * SQUARE_SIZE ;
+                if (pc > 0) {
+                    canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[pc], xZoom*1.15f), xx-SQUARE_SIZE/2, yy-SQUARE_SIZE/2, null);
+                }
 //				if (sq == sqSelected || sq == Position.SRC(mvLast) || sq == Position.DST(mvLast)) {
 //					canvas.drawBitmap(JqmqActivity.scaleToFit(imgSelected,xZoom), xx, yy, null);
 //				}
-			}
-		}
+            }
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        int bzcol, bzrow;
-        int xSpan = 0, sXtart = 0, ySpan = 0, sYtart = 0;
         currentX = e.getX();
-        currentX = e.getX();
-        invalidate();
-        return true;
+        currentY = e.getY();
+        int action = e.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                Log.d("TAG", "ACTION_DOWN");
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.d("TAG", "ACTION_MOVE");
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.d("TAG", "ACTION_UP");
+                break;
+        }
 
-//		if(thinking)//如果正在进行电脑下棋
-//		{
-//			return false;
-//		}
+        if (thinking) {//如果正在进行电脑下棋
+            return false;
+        }
+
+//        int col = (int) ((e.getX() - 0) / 50);
+//        int row = (int) ((e.getY() - 0) / 50);
+//        if (((e.getX() - col * boardOX - imgX) * (e.getX() - col * boardOX - imgX) +
+//                (e.getY() - row * boardOY - imgY) * (e.getY() - row * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
+//            bzcol = col - 1;
+//            bzrow = row - 1;//看其在哪一个格子上
+//        } else if (((e.getX() - col * boardOX - imgX) * (e.getX() - col * boardOX - imgX) +
+//                (e.getY() - (row + 1) * boardOY - imgY) * (e.getY() - (row + 1) * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
+//            bzcol = col - 1;
+//            bzrow = row;
+//        } else if (((e.getX() - (1 + col) * boardOX - imgX) * (e.getX() - (1 + col) * boardOX - imgX) +
+//                (e.getY() - (row + 1) * boardOY - imgY) * (e.getY() - (row + 1) * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
+//            bzcol = col;
+//            bzrow = row;
+//        } else if (
+//                ((e.getX() - (1 + col) * boardOX - imgX) * (e.getX() - (1 + col) * boardOX - imgX) +
+//                        (e.getY() - row * boardOY - imgY) * (e.getY() - row * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
+//            bzcol = col;
+//            bzrow = row - 1;
+//        }
 //
-//		int col = (int)( (e.getX()-0)/50);
-//		int row = (int) ((e.getY()-0)/50);
-//		if(	((e.getX()-col*xSpan-sXtart)*(e.getX()-col*xSpan-sXtart)+
-//				(e.getY()-row*ySpan-sYtart)*(e.getY()-row*ySpan-sYtart))<xSpan/2*xSpan/2)
-//		{
-//			bzcol=col-1;
-//			bzrow=row-1;//看其在哪一个格子上
-//		}
-//		else if(((e.getX()-col*xSpan-sXtart)*(e.getX()-col*xSpan-sXtart)+
-//				(e.getY()-(row+1)*ySpan-sYtart)*(e.getY()-(row+1)*ySpan-sYtart))<xSpan/2*xSpan/2)
-//		{
-//			bzcol=col-1;
-//			bzrow=row;
-//		}
-//		else if(((e.getX()-(1+col)*xSpan-sXtart)*(e.getX()-(1+col)*xSpan-sXtart)+
-//				(e.getY()-(row+1)*ySpan-sYtart)*(e.getY()-(row+1)*ySpan-sYtart))<xSpan/2*xSpan/2)
-//		{
-//			bzcol=col;
-//			bzrow=row;
-//		}
-//		else if(
-//				((e.getX()-(1+col)*xSpan-sXtart)*(e.getX()-(1+col)*xSpan-sXtart)+
-//						(e.getY()-row*ySpan-sYtart)*(e.getY()-row*ySpan-sYtart))<xSpan/2*xSpan/2)
-//		{
-//			bzcol=col;
-//			bzrow=row-1;
-//		}
-//
-//		if (!thinking ) {
-//			int x=0;// = Util.MIN_MAX(0, (e.getX() - xSpan) / SQUARE_SIZE, 8);
-//			int y=0;// = Util.MIN_MAX(0, (e.getY() - ySpan) / SQUARE_SIZE, 9);
-//			clickSquare(Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP));
-//		}
-//
-//		return  true;
+//        if (!thinking) {
+//            int x = 0;// = Util.MIN_MAX(0, (e.getX() - boardOX) / SQUARE_SIZE, 8);
+//            int y = 0;// = Util.MIN_MAX(0, (e.getY() - boardOY) / SQUARE_SIZE, 9);
+//            clickSquare(Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP));
+//        }
+
+        return true;
     }
 
     private void loadBoard() {
@@ -242,20 +244,20 @@ public class GameView extends View {
     private void loadPieces() {
         imgSelected = BitmapFactory.decodeResource(getResources(), R.drawable.ba);
 
-            imgPieces[8]=BitmapFactory.decodeResource(getResources(), R.drawable.bk);
-            imgPieces[9]=BitmapFactory.decodeResource(getResources(), R.drawable.ba);
-            imgPieces[10]=BitmapFactory.decodeResource(getResources(), R.drawable.bb);
-            imgPieces[11]=BitmapFactory.decodeResource(getResources(), R.drawable.bn);
-            imgPieces[12]=BitmapFactory.decodeResource(getResources(), R.drawable.br);
-            imgPieces[13]=BitmapFactory.decodeResource(getResources(), R.drawable.bc);
-            imgPieces[14]=BitmapFactory.decodeResource(getResources(), R.drawable.bp);
-            imgPieces[16]=BitmapFactory.decodeResource(getResources(), R.drawable.rk);
-            imgPieces[17]=BitmapFactory.decodeResource(getResources(), R.drawable.ra);
-            imgPieces[18]=BitmapFactory.decodeResource(getResources(), R.drawable.rb);
-            imgPieces[19]=BitmapFactory.decodeResource(getResources(), R.drawable.rn);
-            imgPieces[20]=BitmapFactory.decodeResource(getResources(), R.drawable.rr);
-            imgPieces[21]=BitmapFactory.decodeResource(getResources(), R.drawable.rc);
-            imgPieces[22]=BitmapFactory.decodeResource(getResources(), R.drawable.rp);
+        imgPieces[8] = BitmapFactory.decodeResource(getResources(), R.drawable.bk);
+        imgPieces[9] = BitmapFactory.decodeResource(getResources(), R.drawable.ba);
+        imgPieces[10] = BitmapFactory.decodeResource(getResources(), R.drawable.bb);
+        imgPieces[11] = BitmapFactory.decodeResource(getResources(), R.drawable.bn);
+        imgPieces[12] = BitmapFactory.decodeResource(getResources(), R.drawable.br);
+        imgPieces[13] = BitmapFactory.decodeResource(getResources(), R.drawable.bc);
+        imgPieces[14] = BitmapFactory.decodeResource(getResources(), R.drawable.bp);
+        imgPieces[16] = BitmapFactory.decodeResource(getResources(), R.drawable.rk);
+        imgPieces[17] = BitmapFactory.decodeResource(getResources(), R.drawable.ra);
+        imgPieces[18] = BitmapFactory.decodeResource(getResources(), R.drawable.rb);
+        imgPieces[19] = BitmapFactory.decodeResource(getResources(), R.drawable.rn);
+        imgPieces[20] = BitmapFactory.decodeResource(getResources(), R.drawable.rr);
+        imgPieces[21] = BitmapFactory.decodeResource(getResources(), R.drawable.rc);
+        imgPieces[22] = BitmapFactory.decodeResource(getResources(), R.drawable.rp);
     }
 
     void clickSquare(int sq_) {
@@ -298,8 +300,8 @@ public class GameView extends View {
 
     void drawSquare(int sq_) {
         int sq = (flipped ? Position.SQUARE_FLIP(sq_) : sq_);
-        float x = xSpan + (Position.FILE_X(sq) - Position.FILE_LEFT) * SQUARE_SIZE;
-        float y = ySpan + (Position.RANK_Y(sq) - Position.RANK_TOP) * SQUARE_SIZE;
+        float x = boardOX + (Position.FILE_X(sq) - Position.FILE_LEFT) * SQUARE_SIZE;
+        float y = boardOY + (Position.RANK_Y(sq) - Position.RANK_TOP) * SQUARE_SIZE;
         //canvas.repaint(x, y, SQUARE_SIZE, SQUARE_SIZE);
     }
 
@@ -346,7 +348,7 @@ public class GameView extends View {
     boolean getResult(int response) {
         if (pos.isMate()) {
             playSound(response < 0 ? RESP_WIN : RESP_LOSS);
-            //showMessage(response < 0 ? "祝贺你取得胜利！" : "请再接再厉！");
+//            Toast.makeText(this, "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"", Toast.LENGTH_SHORT).show();
             return true;
         }
         int vlRep = pos.repStatus(3);
@@ -447,7 +449,7 @@ public class GameView extends View {
         }
     }
 
-    private void getWidthHight () {
+    private void getWidthHight() {
         this.post(new Runnable() {
             @Override
             public void run() {
@@ -458,11 +460,73 @@ public class GameView extends View {
         });
     }
 
-    public static void initChessViewFinal ()
-    {
-        xSpan = 53.0f * xZoom;
-        ySpan = 71.0f * yZoom;
-        SQUARE_SIZE = 56 * (int)xZoom;
+    public static void initChessViewFinal() {
+        xZoom = screen_width/board_width;
+        yZoom = screen_height/board_height;
+        if(xZoom>yZoom){
+            xZoom = yZoom;
+        }else{
+            yZoom=xZoom;
+        }
+
+        imgX = (screen_width - board_width* xZoom)/2;
+        imgY = (screen_height - board_height* yZoom)/2;
+
+        boardOX = board_ox * xZoom;     //左上角棋子位置（相对于棋盘）
+        boardOY = board_oy * yZoom;
+        boardWidth = board_width * xZoom;          //棋盘的大小
+        boardHeight = board_height * xZoom;
+        SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
+    }
+
+    private void restart() {
+        thinking = false;
+        flipped = false;
+        isnoPlaySound = true;
+        handicap = 0;
+        level = 0;
+        board = 0;
+        pieces = 0;
+        music = 8;
+        currentFen = retractFen = Position.STARTUP_FEN[0];
+        pos.fromFen(currentFen);
+        sqSelected = mvLast = 0;
+        invalidate();
+        if (flipped && pos.sdPlayer == 0) {
+            thinking();
+        }
+    }
+
+
+    private int getMySize(int defaultSize, int measureSpec) {
+        int mySize = defaultSize;
+
+        int mode = MeasureSpec.getMode(measureSpec);
+        int size = MeasureSpec.getSize(measureSpec);
+
+        switch (mode) {
+            case MeasureSpec.UNSPECIFIED: {//如果没有指定大小，就设置为默认大小
+                mySize = defaultSize;
+                break;
+            }
+            case MeasureSpec.AT_MOST: {//如果测量模式是最大取值为size
+                //我们将大小取最大值,你也可以取其他值
+                mySize = size;
+                break;
+            }
+            case MeasureSpec.EXACTLY: {//如果是固定的大小，那就不要去改变它
+                mySize = size;
+                break;
+            }
+        }
+        return mySize;
+    }
+
+    private void setimgsize(ImageView img) {
+        //设置图片宽高
+        img.setLayoutParams(new ViewGroup.LayoutParams(mWidth, mHight));
+        img.setImageResource(R.drawable.ba);
+        img.setScaleType(ImageView.ScaleType.FIT_CENTER);
     }
 }
 
