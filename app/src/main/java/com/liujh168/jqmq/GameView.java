@@ -48,6 +48,7 @@ public class GameView extends View {
 
     public static float imgX = (screen_width-boardWidth*xZoom)/2;     //棋盘图像的起始坐标
     public static float imgY = (screen_width-boardHeight*yZoom)/2;
+    int viewLeft=0,         viewTop=0;                               //棋盘view的位置
     public static int isvisible = 0;                                    //控制棋盘棋子是否显示
 
     public static boolean isnoPlaySound = true;//是否播放声音
@@ -106,15 +107,16 @@ public class GameView extends View {
     int sqSelected, mvLast;
     boolean flipped;
     int handicap, level, board, pieces, music;
-    public float currentX = 40, currentY = 50;
     int mWidth, mHight;
-
+    JqmqActivity father;
     public GameView(Context context) {
         super(context);
+        this.father=(JqmqActivity) context;
     }
 
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.father=(JqmqActivity)context;
 
         TypedArray boardattrs = context.obtainStyledAttributes(attrs, R.styleable.GameView);
         board_ox = boardattrs.getInteger(R.styleable.GameView_boardox, 53);     //左上角棋子位置（相对于棋盘）
@@ -154,17 +156,56 @@ public class GameView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int screen_width = getMySize((int)imgX, widthMeasureSpec);
-        int screen_height = getMySize((int)imgY, heightMeasureSpec);
-        Log.d("测量 GameView","screen_width: " + screen_width + "screen_height: " + screen_height);
-        screen_height = (int)((screen_width/9)*10 + board_dd*0.8f) ;
-        setMeasuredDimension(screen_width, screen_height);
+        int width = getMySize((int)imgX, widthMeasureSpec);
+        int height = getMySize((int)imgY, heightMeasureSpec);
+        height = (int)((width/9)*10 + board_dd*0.8f) ;
+        setMeasuredDimension(width, height);
+        viewLeft=getLeft();
+        viewTop=getTop();
+        Log.d("测量 GameView","view_width: " + width + "   view_height: " + height);
+        Log.d("测量 GameView","viewLeft=" + viewLeft + "   viewTop=" + viewTop);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        float currentX = e.getX();
+        float currentY = e.getY();
+        int action = e.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                if (!thinking) {
+                    currentX = e.getX() - boardOX;
+                    currentY = e.getY() - boardOY;
+                    int x = Util.MIN_MAX(0, (int) (currentX / SQUARE_SIZE), 8);
+                    int y = Util.MIN_MAX(0, (int) (currentY / SQUARE_SIZE), 9);
+                    int currsq = Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP);
+                    invalidate();   //更新棋盘图
+                    Log.d("点击位置（相对于View位置,像素）","" + e.getX() + "    " + e.getY());
+                    Log.d("点击位置（转换为棋盘坐标，10进制）","x=" + (x+1) + " y=" + (y+1));
+                    Log.d("点击位置（转换为棋盘坐标，十六进制）", Integer.toHexString(x+Position.FILE_LEFT) + Integer.toHexString(y + Position.RANK_TOP));
+                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
+                    clickSquare(currsq);
+                } else {
+                    Toast.makeText(father, "电脑正在思考", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+            case MotionEvent.ACTION_UP:
+//                Toast.makeText(father, "电脑正在思考......", Toast.LENGTH_SHORT).show();
+//                int mv = search.searchMain(100 << (level << 1));
+//                pos.makeMove(mvLast);
+//                invalidate();
+//                Toast.makeText(father, "电脑走完棋了！", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         //        paint.setColor(Color.RED);
         //        canvas.drawCircle(currentX, currentY, 35, paint);
         canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
@@ -182,63 +223,11 @@ public class GameView extends View {
                 if (pc > 0) {
                     canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[pc], xZoom*1.15f), xx-SQUARE_SIZE/2, yy-SQUARE_SIZE/2, null);
                 }
-//				if (sq == sqSelected || sq == Position.SRC(mvLast) || sq == Position.DST(mvLast)) {
-//					canvas.drawBitmap(JqmqActivity.scaleToFit(imgSelected,xZoom), xx, yy, null);
-//				}
+				if (sq == sqSelected || sq == Position.SRC(mvLast) || sq == Position.DST(mvLast)) {
+					canvas.drawBitmap(JqmqActivity.scaleToFit(imgSelected,xZoom), xx-SQUARE_SIZE/2, yy-SQUARE_SIZE/2, null);
+				}
             }
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        currentX = e.getX();
-        currentY = e.getY();
-        int action = e.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                Log.d("TAG", "ACTION_DOWN");
-                //playSound(1,1);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.d("TAG", "ACTION_MOVE");
-                break;
-            case MotionEvent.ACTION_UP:
-                Log.d("TAG", "ACTION_UP");
-                break;
-        }
-
-        if (thinking) {//如果正在进行电脑下棋
-            return false;
-        }
-
-//        int col = (int) ((e.getX() - 0) / 50);
-//        int row = (int) ((e.getY() - 0) / 50);
-//        if (((e.getX() - col * boardOX - imgX) * (e.getX() - col * boardOX - imgX) +
-//                (e.getY() - row * boardOY - imgY) * (e.getY() - row * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
-//            bzcol = col - 1;
-//            bzrow = row - 1;//看其在哪一个格子上
-//        } else if (((e.getX() - col * boardOX - imgX) * (e.getX() - col * boardOX - imgX) +
-//                (e.getY() - (row + 1) * boardOY - imgY) * (e.getY() - (row + 1) * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
-//            bzcol = col - 1;
-//            bzrow = row;
-//        } else if (((e.getX() - (1 + col) * boardOX - imgX) * (e.getX() - (1 + col) * boardOX - imgX) +
-//                (e.getY() - (row + 1) * boardOY - imgY) * (e.getY() - (row + 1) * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
-//            bzcol = col;
-//            bzrow = row;
-//        } else if (
-//                ((e.getX() - (1 + col) * boardOX - imgX) * (e.getX() - (1 + col) * boardOX - imgX) +
-//                        (e.getY() - row * boardOY - imgY) * (e.getY() - row * boardOY - imgY)) < boardOX / 2 * boardOX / 2) {
-//            bzcol = col;
-//            bzrow = row - 1;
-//        }
-//
-//        if (!thinking) {
-//            int x = 0;// = Util.MIN_MAX(0, (e.getX() - boardOX) / SQUARE_SIZE, 8);
-//            int y = 0;// = Util.MIN_MAX(0, (e.getY() - boardOY) / SQUARE_SIZE, 9);
-//            clickSquare(Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP));
-//        }
-
-        return true;
     }
 
     private void loadBoard() {
@@ -246,44 +235,43 @@ public class GameView extends View {
     }
 
     private void loadPieces() {
-        imgSelected = BitmapFactory.decodeResource(getResources(), R.drawable.ba);
+        imgSelected = BitmapFactory.decodeResource(getResources(), R.drawable.mm);
 
-        imgPieces[8] = BitmapFactory.decodeResource(getResources(), R.drawable.bk);
-        imgPieces[9] = BitmapFactory.decodeResource(getResources(), R.drawable.ba);
-        imgPieces[10] = BitmapFactory.decodeResource(getResources(), R.drawable.bb);
-        imgPieces[11] = BitmapFactory.decodeResource(getResources(), R.drawable.bn);
-        imgPieces[12] = BitmapFactory.decodeResource(getResources(), R.drawable.br);
-        imgPieces[13] = BitmapFactory.decodeResource(getResources(), R.drawable.bc);
-        imgPieces[14] = BitmapFactory.decodeResource(getResources(), R.drawable.bp);
-        imgPieces[16] = BitmapFactory.decodeResource(getResources(), R.drawable.rk);
-        imgPieces[17] = BitmapFactory.decodeResource(getResources(), R.drawable.ra);
-        imgPieces[18] = BitmapFactory.decodeResource(getResources(), R.drawable.rb);
-        imgPieces[19] = BitmapFactory.decodeResource(getResources(), R.drawable.rn);
-        imgPieces[20] = BitmapFactory.decodeResource(getResources(), R.drawable.rr);
-        imgPieces[21] = BitmapFactory.decodeResource(getResources(), R.drawable.rc);
-        imgPieces[22] = BitmapFactory.decodeResource(getResources(), R.drawable.rp);
+        imgPieces[8] = BitmapFactory.decodeResource(getResources(), R.drawable.rk);
+        imgPieces[9] = BitmapFactory.decodeResource(getResources(), R.drawable.ra);
+        imgPieces[10] = BitmapFactory.decodeResource(getResources(), R.drawable.rb);
+        imgPieces[11] = BitmapFactory.decodeResource(getResources(), R.drawable.rn);
+        imgPieces[12] = BitmapFactory.decodeResource(getResources(), R.drawable.rr);
+        imgPieces[13] = BitmapFactory.decodeResource(getResources(), R.drawable.rc);
+        imgPieces[14] = BitmapFactory.decodeResource(getResources(), R.drawable.rp);
+        imgPieces[16] = BitmapFactory.decodeResource(getResources(), R.drawable.bk);
+        imgPieces[17] = BitmapFactory.decodeResource(getResources(), R.drawable.ba);
+        imgPieces[18] = BitmapFactory.decodeResource(getResources(), R.drawable.bb);
+        imgPieces[19] = BitmapFactory.decodeResource(getResources(), R.drawable.bn);
+        imgPieces[20] = BitmapFactory.decodeResource(getResources(), R.drawable.br);
+        imgPieces[21] = BitmapFactory.decodeResource(getResources(), R.drawable.bc);
+        imgPieces[22] = BitmapFactory.decodeResource(getResources(), R.drawable.bp);
     }
 
     void clickSquare(int sq_) {
         int sq = (flipped ? Position.SQUARE_FLIP(sq_) : sq_);
         int pc = pos.squares[sq];
         if ((pc & Position.SIDE_TAG(pos.sdPlayer)) != 0) {
-            if (sqSelected > 0) {
-                drawSquare(sqSelected);
-            }
             if (mvLast > 0) {
-                drawMove(mvLast);
                 mvLast = 0;
             }
             sqSelected = sq;
-            drawSquare(sq);
+            Log.d(TAG,Integer.toHexString(sq));
             playSound(RESP_CLICK);
+            Toast.makeText(father, "选定这个棋子了！", Toast.LENGTH_SHORT).show();
         } else if (sqSelected > 0) {
             int mv = Position.MOVE(sqSelected, sq);
             if (!pos.legalMove(mv)) {
+                Toast.makeText(father, "不能这么走啊，亲", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!pos.makeMove(mv)) {
+                Toast.makeText(father, "不能送将啊，亲", Toast.LENGTH_SHORT).show();
                 playSound(RESP_ILLEGAL);
                 return;
             }
@@ -294,49 +282,42 @@ public class GameView extends View {
             }
             mvLast = mv;
             sqSelected = 0;
-            drawMove(mv);
             playSound(response);
             if (!getResult()) {
+                Toast.makeText(father, "干得好！兄弟，电脑正在伤脑筋呢......", Toast.LENGTH_LONG).show();
                 thinking();
             }
         }
-    }
-
-    void drawSquare(int sq_) {
-        int sq = (flipped ? Position.SQUARE_FLIP(sq_) : sq_);
-        float x = boardOX + (Position.FILE_X(sq) - Position.FILE_LEFT) * SQUARE_SIZE;
-        float y = boardOY + (Position.RANK_Y(sq) - Position.RANK_TOP) * SQUARE_SIZE;
-        //canvas.repaint(x, y, SQUARE_SIZE, SQUARE_SIZE);
-    }
-
-    void drawMove(int mv) {
-        drawSquare(Position.SRC(mv));
-        drawSquare(Position.DST(mv));
-    }
-
-    void playSound(int response) {
     }
 
     void thinking() {
         thinking = true;
         new Thread() {
             public void run() {
-                //setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 int mv = mvLast;
                 mvLast = search.searchMain(100 << (level << 1));
                 pos.makeMove(mvLast);
-//                drawMove(mv);
-//                drawMove(mvLast);
+                //此处要更新棋盘
+                father.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        invalidate();
+                        Toast.makeText(father, "电脑终于下完了", Toast.LENGTH_LONG).show();
+                    }
+                });
                 int response = pos.inCheck() ? RESP_CHECK2 :
                         pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
                 if (pos.captured()) {
                     pos.setIrrev();
                 }
-                //setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 getResult(response);
                 thinking = false;
             }
         }.start();
+    }
+
+    void playSound(int response) {
+        father.playSound(1,0);
     }
 
     /**
@@ -352,7 +333,7 @@ public class GameView extends View {
     boolean getResult(int response) {
         if (pos.isMate()) {
             playSound(response < 0 ? RESP_WIN : RESP_LOSS);
-//            Toast.makeText(this, "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"", Toast.LENGTH_SHORT).show();
+            Toast.makeText(father, "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"", Toast.LENGTH_SHORT).show();
             return true;
         }
         int vlRep = pos.repStatus(3);
@@ -360,13 +341,13 @@ public class GameView extends View {
             vlRep = (response < 0 ? pos.repValue(vlRep) : -pos.repValue(vlRep));
             playSound(vlRep > Position.WIN_VALUE ? RESP_LOSS :
                     vlRep < -Position.WIN_VALUE ? RESP_WIN : RESP_DRAW);
-            //showMessage(vlRep > Position.WIN_VALUE ? "长打作负，请不要气馁！" :
-            //		vlRep < -Position.WIN_VALUE ? "电脑长打作负，祝贺你取得胜利！" : "双方不变作和，辛苦了！");
+            Toast.makeText(father,vlRep > Position.WIN_VALUE ? "长打作负，请不要气馁！" :
+                    vlRep < -Position.WIN_VALUE ? "电脑长打作负，祝贺你取得胜利！" : "双方不变作和，辛苦了！",Toast.LENGTH_LONG);
             return true;
         }
         if (pos.moveNum > 100) {
             playSound(RESP_DRAW);
-            //showMessage("超过自然限着作和，辛苦了！");
+            Toast.makeText(father,"超过自然限着作和，辛苦了！",Toast.LENGTH_LONG);
             return true;
         }
         if (response >= 0) {
@@ -377,7 +358,77 @@ public class GameView extends View {
         return false;
     }
 
-    //根据Position数据生成棋盘棋子图片
+    public static void initChessViewFinal() {
+        xZoom = screen_width/board_width;
+        yZoom = screen_height/board_height;
+        if(xZoom>yZoom){
+            xZoom = yZoom;
+        }else{
+            yZoom=xZoom;
+        }
+
+        imgX = (screen_width - board_width* xZoom)/2;
+        imgY = (screen_height - board_height* yZoom)/2;
+
+        boardOX = board_ox * xZoom;     //左上角棋子位置（相对于棋盘）
+        boardOY = board_oy * yZoom;
+        boardWidth = board_width * xZoom;          //棋盘的大小
+        boardHeight = board_height * xZoom;
+        SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
+    }
+
+    private void restart() {
+        pos.fromFen(currentFen);
+        retractFen = currentFen;
+        sqSelected = mvLast = 0;
+        invalidate();
+        if (flipped && pos.sdPlayer == 0) {
+            thinking();
+        }
+    }
+
+    private int getMySize(int defaultSize, int measureSpec) {
+        int mySize = defaultSize;
+
+        int mode = MeasureSpec.getMode(measureSpec);
+        int size = MeasureSpec.getSize(measureSpec);
+
+        switch (mode) {
+            case MeasureSpec.UNSPECIFIED: {//如果没有指定大小，就设置为默认大小
+                mySize = defaultSize;
+                break;
+            }
+            case MeasureSpec.AT_MOST: {//如果测量模式是最大取值为size
+                //我们将大小取最大值,你也可以取其他值
+                mySize = size;
+                break;
+            }
+            case MeasureSpec.EXACTLY: {//如果是固定的大小，那就不要去改变它
+                mySize = size;
+                break;
+            }
+        }
+        return mySize;
+    }
+
+    private void setimgsize(ImageView img) {
+        //设置图片宽高
+        img.setLayoutParams(new ViewGroup.LayoutParams(mWidth, mHight));
+        img.setImageResource(R.drawable.ba);
+        img.setScaleType(ImageView.ScaleType.FIT_CENTER);
+    }
+
+    private void getWidthHight() {
+        this.post(new Runnable() {
+            @Override
+            public void run() {
+                mWidth = getWidth();
+                mHight = mWidth;
+                Log.d(TAG, "run: this.post.Runnable.run of getWidthHight");
+            }
+        });
+    }
+    //根据Position数据生成棋盘棋子图片(这个函数未使用，待调试）
     private void drawBoard() {
         Bitmap board = BitmapFactory.decodeResource(getResources(), R.drawable.board);
         // 得到图片的宽、高
@@ -451,86 +502,6 @@ public class GameView extends View {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    private void getWidthHight() {
-        this.post(new Runnable() {
-            @Override
-            public void run() {
-                mWidth = getWidth();
-                mHight = mWidth;
-                Log.d(TAG, "run: this.post.Runnable.run of getWidthHight");
-            }
-        });
-    }
-
-    public static void initChessViewFinal() {
-        xZoom = screen_width/board_width;
-        yZoom = screen_height/board_height;
-        if(xZoom>yZoom){
-            xZoom = yZoom;
-        }else{
-            yZoom=xZoom;
-        }
-
-        imgX = (screen_width - board_width* xZoom)/2;
-        imgY = (screen_height - board_height* yZoom)/2;
-
-        boardOX = board_ox * xZoom;     //左上角棋子位置（相对于棋盘）
-        boardOY = board_oy * yZoom;
-        boardWidth = board_width * xZoom;          //棋盘的大小
-        boardHeight = board_height * xZoom;
-        SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
-    }
-
-    private void restart() {
-        thinking = false;
-        flipped = false;
-        isnoPlaySound = true;
-        handicap = 0;
-        level = 0;
-        board = 0;
-        pieces = 0;
-        music = 8;
-        currentFen = retractFen = Position.STARTUP_FEN[0];
-        pos.fromFen(currentFen);
-        sqSelected = mvLast = 0;
-        invalidate();
-        if (flipped && pos.sdPlayer == 0) {
-            thinking();
-        }
-    }
-
-
-    private int getMySize(int defaultSize, int measureSpec) {
-        int mySize = defaultSize;
-
-        int mode = MeasureSpec.getMode(measureSpec);
-        int size = MeasureSpec.getSize(measureSpec);
-
-        switch (mode) {
-            case MeasureSpec.UNSPECIFIED: {//如果没有指定大小，就设置为默认大小
-                mySize = defaultSize;
-                break;
-            }
-            case MeasureSpec.AT_MOST: {//如果测量模式是最大取值为size
-                //我们将大小取最大值,你也可以取其他值
-                mySize = size;
-                break;
-            }
-            case MeasureSpec.EXACTLY: {//如果是固定的大小，那就不要去改变它
-                mySize = size;
-                break;
-            }
-        }
-        return mySize;
-    }
-
-    private void setimgsize(ImageView img) {
-        //设置图片宽高
-        img.setLayoutParams(new ViewGroup.LayoutParams(mWidth, mHight));
-        img.setImageResource(R.drawable.ba);
-        img.setScaleType(ImageView.ScaleType.FIT_CENTER);
     }
 }
 

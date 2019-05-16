@@ -227,6 +227,12 @@ public class JqmqActivity extends Activity {
         soundPoolMap.put(3, soundPool.load(this, R.raw.win, 1)); //赢了
         soundPoolMap.put(4, soundPool.load(this, R.raw.loss, 1)); //输了
         soundPoolMap.put(5, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(6, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(7, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(8, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(9, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(10, soundPool.load(this, R.raw.classic, 1)); //听听mid
+        soundPoolMap.put(11, soundPool.load(this, R.raw.classic, 1)); //听听mid
     }
     //播放声音
     public  void playSound(int sound, int loop)

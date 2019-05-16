@@ -345,15 +345,15 @@ public class Search {
 	}
 
 	public int searchMain(int depth, int millis) {
-		mvResult = pos.bookMove();
-		if (mvResult > 0) {
-			pos.makeMove(mvResult);
-			if (pos.repStatus(3) == 0) {
-				pos.undoMakeMove();
-				return mvResult;
-			}
-			pos.undoMakeMove();
-		}
+//		mvResult = pos.bookMove();
+//		if (mvResult > 0) {
+//			pos.makeMove(mvResult);
+//			if (pos.repStatus(3) == 0) {
+//				pos.undoMakeMove();
+//				return mvResult;
+//			}
+//			pos.undoMakeMove();
+//		}
 		int vl = 0;
 		int[] mvs = new int[MAX_GEN_MOVES];
 		int genMoves = pos.generateAllMoves(mvs);
