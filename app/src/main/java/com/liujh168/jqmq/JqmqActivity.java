@@ -222,17 +222,30 @@ public class JqmqActivity extends Activity {
         soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
         soundPoolMap = new HashMap<Integer, Integer>();
 
-        soundPoolMap.put(1, soundPool.load(this, R.raw.capture, 1));//背景音乐
-        soundPoolMap.put(2, soundPool.load(this, R.raw.move, 1)); //玩家走棋
-        soundPoolMap.put(3, soundPool.load(this, R.raw.win, 1)); //赢了
-        soundPoolMap.put(4, soundPool.load(this, R.raw.loss, 1)); //输了
-        soundPoolMap.put(5, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(6, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(7, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(8, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(9, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(10, soundPool.load(this, R.raw.classic, 1)); //听听mid
-        soundPoolMap.put(11, soundPool.load(this, R.raw.classic, 1)); //听听mid
+//        private static final int RESP_CLICK = 0;
+//        private static final int RESP_ILLEGAL = 1;
+//        private static final int RESP_MOVE = 2;
+//        private static final int RESP_MOVE2 = 3;
+//        private static final int RESP_CAPTURE = 4;
+//        private static final int RESP_CAPTURE2 = 5;
+//        private static final int RESP_CHECK = 6;
+//        private static final int RESP_CHECK2 = 7;
+//        private static final int RESP_WIN = 8;
+//        private static final int RESP_DRAW = 9;
+//        private static final int RESP_LOSS = 10;
+
+        soundPoolMap.put(0, soundPool.load(this, R.raw.click, 1));
+        soundPoolMap.put(1, soundPool.load(this, R.raw.illegal, 1));
+        soundPoolMap.put(2, soundPool.load(this, R.raw.move, 1));
+        soundPoolMap.put(3, soundPool.load(this, R.raw.move, 1));
+        soundPoolMap.put(4, soundPool.load(this, R.raw.capture, 1));
+        soundPoolMap.put(5, soundPool.load(this, R.raw.capture, 1));
+        soundPoolMap.put(6, soundPool.load(this, R.raw.check, 1));
+        soundPoolMap.put(7, soundPool.load(this, R.raw.check, 1));
+        soundPoolMap.put(8, soundPool.load(this, R.raw.win, 1));
+        soundPoolMap.put(9, soundPool.load(this, R.raw.draw, 1));
+        soundPoolMap.put(10, soundPool.load(this, R.raw.loss, 1));
+        soundPoolMap.put(11, soundPool.load(this, R.raw.classic, 1));   //背景音乐mid
     }
     //播放声音
     public  void playSound(int sound, int loop)
@@ -254,7 +267,7 @@ public class JqmqActivity extends Activity {
         btnShowPiece =  (Button) findViewById(R.id.btnshowpiece);
         Button btnStart =  (Button) findViewById(R.id.btnstart);
         Button btnOpen =  (Button) findViewById(R.id.btnopen);
-        Button btnExit =  (Button) findViewById(R.id.btnexit);
+        Button btnHint =  (Button) findViewById(R.id.btnhint);
         Button btnSound =  (Button) findViewById(R.id.btnsound);
         Button btnNew =  (Button) findViewById(R.id.btnnew);
         fen =  (EditText) findViewById(R.id.edtInfofen);
@@ -268,7 +281,7 @@ public class JqmqActivity extends Activity {
                                           GameView.pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
                                           GameView.isvisible=1;
                                           gameView.invalidate();
-                                          playSound(1,0);
+                                          playSound(GameView.RESP_CLICK,0);
                                       }
                                   }
         );
@@ -285,7 +298,7 @@ public class JqmqActivity extends Activity {
                                                 GameView.pos.fromFen("1r1aka3/4n4/4b3b/p1R5p/7r1/3cC1PN1/P3PN2P/4B1C2/4A4/2BAK3c b");
                                                 gameView.invalidate();
                                                 //fen.setText(R.string.txt_info_working);
-                                                playSound(2,0);
+                                                playSound(GameView.RESP_CLICK,0);
                                             }
                                         }
         );
@@ -294,7 +307,7 @@ public class JqmqActivity extends Activity {
                                         @Override
                                         public void onClick(View view) {
                                             fen.setText(R.string.txt_info_working);
-                                            playSound(3,0);
+                                            playSound(GameView.RESP_CLICK,0);
                                         }
                                     }
         );
@@ -303,7 +316,7 @@ public class JqmqActivity extends Activity {
                                        @Override
                                        public void onClick(View view) {
                                            fen.setText(R.string.wokao);
-                                           playSound(4,0);
+                                           playSound(GameView.RESP_WIN,0);
                                        }
                                    }
         );
@@ -312,15 +325,19 @@ public class JqmqActivity extends Activity {
                                         @Override
                                         public void onClick(View view) {
                                             fen.setText(R.string.btn_txt_sound);
-                                            playSound(5,0);
+                                            playSound(GameView.RESP_BG,0);
                                         }
                                     }
         );
 
-        btnExit.setOnClickListener(new View.OnClickListener() {
+        btnHint.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View view) {
-                                           finish();
+                                           Toast.makeText(JqmqActivity.this, "电脑给你支招，思考中......", Toast.LENGTH_SHORT).show();
+                                           int mv = GameView.search.searchMain(100 << (1 << 1));
+                                           GameView.pos.makeMove(mv);
+                                           gameView.invalidate();
+                                           //finish();
                                        }
                                    }
         );

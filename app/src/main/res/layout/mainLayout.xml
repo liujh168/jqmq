@@ -98,9 +98,9 @@
             android:text="@string/btn_txt_sound" />
 
         <Button
-            android:id="@+id/btnexit"
+            android:id="@+id/btnhint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_exit" />
+            android:text="@string/btn_txt_hint" />
     </LinearLayout>
 </LinearLayout>

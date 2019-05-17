@@ -53,18 +53,20 @@ public class GameView extends View {
 
     public static boolean isnoPlaySound = true;//是否播放声音
 
-    private static final int RESP_CLICK = 0;
-    private static final int RESP_ILLEGAL = 1;
-    private static final int RESP_MOVE = 2;
-    private static final int RESP_MOVE2 = 3;
-    private static final int RESP_CAPTURE = 4;
-    private static final int RESP_CAPTURE2 = 5;
-    private static final int RESP_CHECK = 6;
-    private static final int RESP_CHECK2 = 7;
-    private static final int RESP_WIN = 8;
-    private static final int RESP_DRAW = 9;
-    private static final int RESP_LOSS = 10;
+    public static final int RESP_CLICK = 0;
+    public static final int RESP_ILLEGAL = 1;
+    public static final int RESP_MOVE = 2;
+    public static final int RESP_MOVE2 = 3;
+    public static final int RESP_CAPTURE = 4;
+    public static final int RESP_CAPTURE2 = 5;
+    public static final int RESP_CHECK = 6;
+    public static final int RESP_CHECK2 = 7;
+    public static final int RESP_WIN = 8;
+    public static final int RESP_DRAW = 9;
+    public static final int RESP_LOSS = 10;
+    public static final int RESP_BG = 11;          //背景音乐
 
+    private String resultMessage="";
     private static final String[] PIECE_NAME = {
             null, null, null, null, null, null, null, null,
             "rk", "ra", "rb", "rn", "rr", "rc", "rp", null,
@@ -98,17 +100,20 @@ public class GameView extends View {
     Bitmap[] imgPieces = new Bitmap[PIECE_NAME.length];
     Bitmap imgSelected, imgBoard;
 
+    JqmqActivity father;
+
+    public  static Position pos;
+    public static Search search;
+
     private Paint paint;
     volatile boolean thinking;
-    public  static Position pos;
-    Search search;
     String currentFen;
     String retractFen;
     int sqSelected, mvLast;
     boolean flipped;
     int handicap, level, board, pieces, music;
     int mWidth, mHight;
-    JqmqActivity father;
+
     public GameView(Context context) {
         super(context);
         this.father=(JqmqActivity) context;
@@ -150,7 +155,7 @@ public class GameView extends View {
         retractFen = currentFen;
         flipped = false;
         thinking = false;
-        int handicap = 0, level = 0, board = 0, pieces = 0, music = 8;
+        int handicap = 0, level = 1, board = 0, pieces = 0, music = 8;
     }
 
     @Override
@@ -174,30 +179,18 @@ public class GameView extends View {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (!thinking) {
-                    currentX = e.getX() - boardOX;
-                    currentY = e.getY() - boardOY;
+                    currentX = e.getX() - (boardOX - SQUARE_SIZE/2);
+                    currentY = e.getY() - (boardOY - SQUARE_SIZE/2);
                     int x = Util.MIN_MAX(0, (int) (currentX / SQUARE_SIZE), 8);
                     int y = Util.MIN_MAX(0, (int) (currentY / SQUARE_SIZE), 9);
                     int currsq = Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP);
-                    invalidate();   //更新棋盘图
-                    Log.d("点击位置（相对于View位置,像素）","" + e.getX() + "    " + e.getY());
-                    Log.d("点击位置（转换为棋盘坐标，10进制）","x=" + (x+1) + " y=" + (y+1));
-                    Log.d("点击位置（转换为棋盘坐标，十六进制）", Integer.toHexString(x+Position.FILE_LEFT) + Integer.toHexString(y + Position.RANK_TOP));
-                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
+//                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
                     clickSquare(currsq);
-                } else {
-                    Toast.makeText(father, "电脑正在思考", Toast.LENGTH_SHORT).show();
-                    return true;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 break;
             case MotionEvent.ACTION_UP:
-//                Toast.makeText(father, "电脑正在思考......", Toast.LENGTH_SHORT).show();
-//                int mv = search.searchMain(100 << (level << 1));
-//                pos.makeMove(mvLast);
-//                invalidate();
-//                Toast.makeText(father, "电脑走完棋了！", Toast.LENGTH_SHORT).show();
                 break;
         }
         return true;
@@ -261,18 +254,18 @@ public class GameView extends View {
                 mvLast = 0;
             }
             sqSelected = sq;
-            Log.d(TAG,Integer.toHexString(sq));
+            invalidate();
             playSound(RESP_CLICK);
-            Toast.makeText(father, "选定这个棋子了！", Toast.LENGTH_SHORT).show();
         } else if (sqSelected > 0) {
             int mv = Position.MOVE(sqSelected, sq);
             if (!pos.legalMove(mv)) {
+                playSound(RESP_ILLEGAL);
                 Toast.makeText(father, "不能这么走啊，亲", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!pos.makeMove(mv)) {
-                Toast.makeText(father, "不能送将啊，亲", Toast.LENGTH_SHORT).show();
                 playSound(RESP_ILLEGAL);
+                Toast.makeText(father, "不能送将啊，亲", Toast.LENGTH_SHORT).show();
                 return;
             }
             int response = pos.inCheck() ? RESP_CHECK :
@@ -282,9 +275,10 @@ public class GameView extends View {
             }
             mvLast = mv;
             sqSelected = 0;
+            invalidate();
             playSound(response);
             if (!getResult()) {
-                Toast.makeText(father, "干得好！兄弟，电脑正在伤脑筋呢......", Toast.LENGTH_LONG).show();
+                Toast.makeText(father,resultMessage,Toast.LENGTH_LONG);
                 thinking();
             }
         }
@@ -297,27 +291,27 @@ public class GameView extends View {
                 int mv = mvLast;
                 mvLast = search.searchMain(100 << (level << 1));
                 pos.makeMove(mvLast);
-                //此处要更新棋盘
-                father.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        invalidate();
-                        Toast.makeText(father, "电脑终于下完了", Toast.LENGTH_LONG).show();
-                    }
-                });
                 int response = pos.inCheck() ? RESP_CHECK2 :
                         pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
                 if (pos.captured()) {
                     pos.setIrrev();
                 }
                 getResult(response);
+                //此处更新棋盘，在UI线程提示消息
+                father.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        invalidate();
+                        Toast.makeText(father,resultMessage,Toast.LENGTH_LONG);
+                    }
+                });
                 thinking = false;
             }
         }.start();
     }
 
     void playSound(int response) {
-        father.playSound(1,0);
+        father.playSound(response,0);
     }
 
     /**
@@ -332,8 +326,8 @@ public class GameView extends View {
      */
     boolean getResult(int response) {
         if (pos.isMate()) {
+            resultMessage = "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"";
             playSound(response < 0 ? RESP_WIN : RESP_LOSS);
-            Toast.makeText(father, "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"", Toast.LENGTH_SHORT).show();
             return true;
         }
         int vlRep = pos.repStatus(3);
@@ -341,13 +335,13 @@ public class GameView extends View {
             vlRep = (response < 0 ? pos.repValue(vlRep) : -pos.repValue(vlRep));
             playSound(vlRep > Position.WIN_VALUE ? RESP_LOSS :
                     vlRep < -Position.WIN_VALUE ? RESP_WIN : RESP_DRAW);
-            Toast.makeText(father,vlRep > Position.WIN_VALUE ? "长打作负，请不要气馁！" :
-                    vlRep < -Position.WIN_VALUE ? "电脑长打作负，祝贺你取得胜利！" : "双方不变作和，辛苦了！",Toast.LENGTH_LONG);
+            resultMessage = vlRep > Position.WIN_VALUE ? "长打作负，请不要气馁！" :
+                    vlRep < -Position.WIN_VALUE ? "电脑长打作负，祝贺你取得胜利！" : "双方不变作和，辛苦了！";
             return true;
         }
         if (pos.moveNum > 100) {
             playSound(RESP_DRAW);
-            Toast.makeText(father,"超过自然限着作和，辛苦了！",Toast.LENGTH_LONG);
+            resultMessage = "超过自然限着作和，辛苦了！";
             return true;
         }
         if (response >= 0) {

@@ -17,6 +17,7 @@
     <string name="btn_txt_hideboard">隐藏棋盘</string>
     <string name="btn_txt_settings">设置</string>
     <string name="btn_txt_exit">退出</string>
+    <string name="btn_txt_hint">支招</string>
     <string name="btn_txt_open">载入</string>
     <string name="btn_txt_save">保存</string>
     <string name="btn_txt_piece_read">朗读棋盘</string>
