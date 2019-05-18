@@ -3,6 +3,9 @@ import static android.content.ContentValues.TAG;
 import static java.lang.Thread.sleep;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -53,6 +56,7 @@ public class JqmqActivity extends Activity {
     Bitmap imgWelcome;  //当前logo图片引用
     SoundPool soundPool;//声音池
     HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView gameView;
+    private Lock lock = new ReentrantLock();
 
     Handler hd = new Handler(){
         @Override
