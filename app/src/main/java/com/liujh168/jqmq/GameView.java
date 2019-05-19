@@ -20,8 +20,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static android.content.ContentValues.TAG;
+import static java.util.concurrent.locks.Lock.*;
 
 import com.liujh168.jqmq.Position;
 
@@ -113,6 +116,8 @@ public class GameView extends View {
     boolean flipped;
     int handicap, level, board, pieces, music;
     int mWidth, mHight;
+
+    private Lock lock = new ReentrantLock();
 
     public GameView(Context context) {
         super(context);
@@ -206,6 +211,7 @@ public class GameView extends View {
         if(isvisible == 0) return;  //不显示棋子
 
 //        pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
+        lock.lock();  //这里应该只锁pos数据更新，重画时间久
         for (int x = Position.FILE_LEFT; x <= Position.FILE_RIGHT; x++) {
             for (int y = Position.RANK_TOP; y <= Position.RANK_BOTTOM; y++) {
                 int sq = Position.COORD_XY(x, y);
@@ -221,6 +227,7 @@ public class GameView extends View {
 				}
             }
         }
+        lock.unlock();
     }
 
     private void loadBoard() {
@@ -275,6 +282,7 @@ public class GameView extends View {
             }
             mvLast = mv;
             sqSelected = 0;
+
             invalidate();
             playSound(response);
             if (!getResult()) {
@@ -289,8 +297,10 @@ public class GameView extends View {
         new Thread() {
             public void run() {
                 int mv = mvLast;
+                lock.lock();
                 mvLast = search.searchMain(100 << (level << 1));
                 pos.makeMove(mvLast);
+                lock.unlock();
                 int response = pos.inCheck() ? RESP_CHECK2 :
                         pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
                 if (pos.captured()) {
