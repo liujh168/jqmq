@@ -2,41 +2,32 @@
 <resources>
     <string name="app_name">下盲棋</string>
     <string name="title_name">中国象棋盲棋辅助训练系统</string>
-    <string name="wokao">哇噻，下盲棋！</string>
-    <string name="txt_fen">这里可以显示或输入Fen串</string>
-    <string name="txt_start_fen">rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR</string>
-    <string name="txt_message">you click me!</string>
-    <string name="txt_hint_fen">这里可以输入标准的fen串</string>
 
-    <string name="btn_txt_new">新局</string>
     <string name="btn_txt_start">开始</string>
-    <string name="btn_txt_pause">暂停</string>
+    <string name="btn_txt_menu">菜单</string>
+    <string name="btn_txt_open">载入</string>
+    <string name="btn_txt_save">保存</string>
+    <string name="btn_txt_copyfen">复制局面</string>
+    <string name="btn_txt_pastefen">粘贴局面</string>
     <string name="btn_txt_showpiece">显示棋子</string>
     <string name="btn_txt_hidepiece">隐藏棋子</string>
     <string name="btn_txt_showboard">显示棋盘</string>
+    <string name="btn_txt_showboardpiece">显示棋盘棋子</string>
     <string name="btn_txt_hideboard">隐藏棋盘</string>
+    <string name="btn_txt_prompt">电脑提示</string>
+    <string name="btn_txt_undo">悔棋</string>
+    <string name="btn_txt_return">返回</string>
+
+    <string name="wokao">哇噻，下盲棋！</string>
+    <string name="txt_start_fen">rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR</string>
+    <string name="txt_hint_fen">这里可以输入标准的fen串</string>
+
     <string name="btn_txt_settings">设置</string>
-    <string name="btn_txt_exit">退出</string>
-    <string name="btn_txt_hint">支招</string>
-    <string name="btn_txt_open">载入</string>
-    <string name="btn_txt_save">保存</string>
-    <string name="btn_txt_piece_read">朗读棋盘</string>
-    <string name="btn_txt_board_read">朗读棋谱</string>
-    <string name="btn_txt_sound">背景音乐</string>
     <string name="menu_file_open">打开棋谱</string>
     <string name="menu_file_save">保存棋谱</string>
-
     <string name="txt_info_working">正在努力开发之中......</string>
-
-    <string name="msdk_upload_file_title">上传文件</string>
-    <string name="btn_txt_dlg_title">温馨提示</string>
-    <string name="btn_txt_title">你暂时没有体验资格</string>
-    <string name="btn_txt_positive_downloading">下载中</string>
-    <string name="btn_txt_negtive">取消</string>
-    <string name="btn_txt_submit">确定</string>
-    <string name="btn_txt_network_not_connected">您未连接网络，请检查网络!</string>
-    <string name="btn_txt_server_error">当前服务不可用，请稍后重试!</string>
-    <string name="btn_txt_positive_retry_again">立即重试</string>
-    <string name="btn_txt_network_error">网络异常，请稍后重试!</string>
-
+    <string name="txt_info_prompt_toast">电脑给你支招，思考中......</string>
+    <string name="txt_info_prompt">电脑提示最佳着法，不管你信不信，反正我信了</string>
+    <string name="txt_info_undo">落子无悔大丈夫，下不为例哦</string>
+    <string name="txt_info_showhide">切换显示隐患棋盘棋子画面</string>
 </resources>

@@ -11,7 +11,7 @@
         android:id="@+id/gameview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff0000"
+        android:background="@drawable/brothers"
         jqmq:boardbg="#ff0000"
         jqmq:boarddd="56"
         jqmq:boardline="#0000ee"
@@ -48,22 +48,22 @@
             android:text="@string/btn_txt_open" />
 
         <Button
-            android:id="@+id/btnpieceread"
+            android:id="@+id/btncopyfen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_board_read" />
+            android:text="@string/btn_txt_copyfen" />
 
         <Button
             android:id="@+id/btnshowpiece"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_showpiece" />
+            android:text="@string/btn_txt_showboard" />
 
         <Button
-            android:id="@+id/btnsettings"
+            android:id="@+id/btnundo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_settings" />
+            android:text="@string/btn_txt_undo" />
     </LinearLayout>
 
     <!--第二排按钮-->
@@ -74,10 +74,10 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnnew"
+            android:id="@+id/btnmenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_new" />
+            android:text="@string/btn_txt_menu" />
 
         <Button
             android:id="@+id/btnsave"
@@ -86,21 +86,21 @@
             android:text="@string/btn_txt_save" />
 
         <Button
-            android:id="@+id/btnread"
+            android:id="@+id/btnpastefen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_piece_read" />
+            android:text="@string/btn_txt_pastefen" />
 
         <Button
-            android:id="@+id/btnsound"
+            android:id="@+id/btnprompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_sound" />
+            android:text="@string/btn_txt_prompt" />
 
         <Button
-            android:id="@+id/btnhint"
+            android:id="@+id/btnreturn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_txt_hint" />
+            android:text="@string/btn_txt_return" />
     </LinearLayout>
 </LinearLayout>

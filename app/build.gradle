@@ -5,8 +5,8 @@ android {
 
     defaultConfig {
         applicationId "com.liujh168.jqmq"
-        minSdkVersion 7
-        targetSdkVersion 8
+        minSdkVersion 16
+        targetSdkVersion 23
     }
 
     buildTypes {

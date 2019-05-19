@@ -101,7 +101,7 @@ public class GameView extends View {
     };
 
     Bitmap[] imgPieces = new Bitmap[PIECE_NAME.length];
-    Bitmap imgSelected, imgBoard;
+    Bitmap imgSelected, imgBoard, imgbrothers;
 
     JqmqActivity father;
 
@@ -204,13 +204,18 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //        paint.setColor(Color.RED);
-        //        canvas.drawCircle(currentX, currentY, 35, paint);
+
+        if(isvisible == 0) {
+            return;  //仅显示广告
+        }
+
+        if(isvisible == 1) {
+            canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
+            return;  //仅显示棋盘，不显示棋子
+        }
+
+        //以下正常显示棋盘棋子
         canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
-
-        if(isvisible == 0) return;  //不显示棋子
-
-//        pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w");
         lock.lock();  //这里应该只锁pos数据更新，重画时间久
         for (int x = Position.FILE_LEFT; x <= Position.FILE_RIGHT; x++) {
             for (int y = Position.RANK_TOP; y <= Position.RANK_BOTTOM; y++) {
@@ -232,6 +237,7 @@ public class GameView extends View {
 
     private void loadBoard() {
         imgBoard = BitmapFactory.decodeResource(getResources(), R.drawable.board);
+        imgbrothers = BitmapFactory.decodeResource(getResources(), R.drawable.brothers);
     }
 
     private void loadPieces() {
