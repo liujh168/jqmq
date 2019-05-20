@@ -15,6 +15,7 @@
         jqmq:boardbg="#ff0000"
         jqmq:boarddd="56"
         jqmq:boardline="#0000ee"
+        jqmq:isVisible="2"
         jqmq:boardox="53"
         jqmq:boardoy="71"
         jqmq:fen="@string/txt_start_fen" />
@@ -31,8 +32,6 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/btn_margin_left"
-        android:layout_marginTop="@dimen/btn_margin_top"
         android:orientation="horizontal">
 
         <Button
@@ -68,9 +67,8 @@
 
     <!--第二排按钮-->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/btn_margin_left"
         android:orientation="horizontal">
 
         <Button

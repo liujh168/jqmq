@@ -3,6 +3,8 @@ package com.liujh168.jqmq;
 import static android.content.ContentValues.TAG;
 import static java.lang.Thread.sleep;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
@@ -273,18 +275,18 @@ public class JqmqActivity extends Activity {
         final Button btnShowPiece = (Button) findViewById(R.id.btnshowpiece);
         Button btnPrompt = (Button) findViewById(R.id.btnprompt);
         Button btnUndo = (Button) findViewById(R.id.btnundo);
-        Button btnReturn = (Button) findViewById(R.id.btnreturn);
+        final Button btnReturn = (Button) findViewById(R.id.btnreturn);
         final EditText edtFen = (EditText) findViewById(R.id.edtInfofen);
         btnStart.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View view) {
                                             GameView.pos.fromFen(getString(R.string.txt_start_fen));
-                                            GameView.isvisible = 1;
+                                            GameView.isvisible = 2;
                                             gameView.invalidate();
                                             playSound(GameView.RESP_CLICK, 0);
 
-                                            btnShowPiece.setText(R.string.btn_txt_showpiece);
-                                            edtFen.setText(R.string.txt_start_fen);
+                                            btnShowPiece.setText(R.string.btn_txt_hideboard);
+                                            //edtFen.setText(R.string.txt_start_fen);
                                         }
                                     }
         );
@@ -359,6 +361,7 @@ public class JqmqActivity extends Activity {
                                                         break;
                                                     default:
                                                         GameView.isvisible = 0;
+                                                        btnShowPiece.setText(R.string.btn_txt_showboard);
                                                         break;
                                                 }
                                                 gameView.invalidate();
@@ -372,12 +375,31 @@ public class JqmqActivity extends Activity {
                                          public void onClick(View view) {
                                              Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_SHORT).show();
                                              int mv = GameView.search.searchMain(100 << (1 << 1));
-                                             edtFen.setText(R.string.txt_info_prompt  + Integer.toHexString(mv));
-//                                             GameView.pos.makeMove(mv);
-//                                             gameView.invalidate();
+                                             GameView.pos.makeMove(mv);
+                                             gameView.invalidate();
+                                             Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt), Toast.LENGTH_SHORT).show();
+                                             edtFen.setText(Integer.toHexString(mv));
+                                             mv = GameView.search.searchMain(100 << (1 << 1));
+                                             GameView.pos.makeMove(mv);
+                                             gameView.invalidate();
                                          }
                                      }
         );
+
+        btnUndo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                   if(GameView.pos.distance>=0)
+                   {
+                       GameView.pos.undoMakeMove();
+                       gameView.invalidate();
+                   }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         btnReturn.setOnClickListener(new View.OnClickListener() {
                                          @Override

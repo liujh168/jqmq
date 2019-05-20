@@ -52,7 +52,7 @@ public class GameView extends View {
     public static float imgX = (screen_width-boardWidth*xZoom)/2;     //棋盘图像的起始坐标
     public static float imgY = (screen_width-boardHeight*yZoom)/2;
     int viewLeft=0,         viewTop=0;                               //棋盘view的位置
-    public static int isvisible = 0;                                    //控制棋盘棋子是否显示
+    public static int isvisible = 2;                                    //控制棋盘棋子是否显示
 
     public static boolean isnoPlaySound = true;//是否播放声音
 
