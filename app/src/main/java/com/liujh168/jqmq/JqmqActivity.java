@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +33,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
@@ -95,12 +97,40 @@ public class JqmqActivity extends Activity {
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        MenuInflater inflator = new MenuInflater(this);
+        inflator.inflate(R.menu.pmenu, menu);
+        menu.setHeaderTitle("棋盘上下文菜单");
+    }
+
+    //上下文菜单被点击是触发该方法
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btncopyfen:
+                Toast.makeText(this, R.string.btn_txt_copyfen, Toast.LENGTH_LONG).show();
+                break;
+            case R.id.btnpastefen:
+                Toast.makeText(this, R.string.btn_txt_pastefen, Toast.LENGTH_LONG).show();
+                break;
+            default:
+                Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_LONG).show();
+
+        }
+        playSound(GameView.RESP_CLICK, 0);
+        return true;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
         return true;
     }
 
+    //主菜单动作
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -110,12 +140,19 @@ public class JqmqActivity extends Activity {
             case R.id.menufilesave:
                 Toast.makeText(this, R.string.menu_file_save, Toast.LENGTH_LONG).show();
                 break;
-            case R.id.menu_sys_set:
-                Toast.makeText(this, R.string.btn_txt_settings, Toast.LENGTH_LONG).show();
+            case R.id.menu_music:
+                playSound(GameView.RESP_BG, 1);
+                Toast.makeText(this, R.string.txt_info_music, Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menu_music_stop:
+                soundPool.stop(GameView.RESP_BG);
+                Toast.makeText(this, R.string.txt_info_music_stop, Toast.LENGTH_LONG).show();
                 break;
             default:
+                Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_LONG).show();
                 return super.onOptionsItemSelected(item);
         }
+        playSound(GameView.RESP_CLICK, 0);
         return true;
     }
 
@@ -267,9 +304,9 @@ public class JqmqActivity extends Activity {
         final View gameView = (View) findViewById(R.id.gameview);
 
         Button btnStart = (Button) findViewById(R.id.btnstart);
-        Button btnMenu = (Button) findViewById(R.id.btnmenu);
-        Button btnOpen = (Button) findViewById(R.id.btnopen);
-        Button btnSave = (Button) findViewById(R.id.btnsave);
+        final Button btnMenu = (Button) findViewById(R.id.btnmenu);
+//        Button btnOpen = (Button) findViewById(R.id.btnopen);
+//        Button btnSave = (Button) findViewById(R.id.btnsave);
         Button btnCopyfen = (Button) findViewById(R.id.btncopyfen);
         Button btnPastefen = (Button) findViewById(R.id.btnpastefen);
         final Button btnShowPiece = (Button) findViewById(R.id.btnshowpiece);
@@ -277,6 +314,9 @@ public class JqmqActivity extends Activity {
         Button btnUndo = (Button) findViewById(R.id.btnundo);
         final Button btnReturn = (Button) findViewById(R.id.btnreturn);
         final EditText edtFen = (EditText) findViewById(R.id.edtInfofen);
+
+        registerForContextMenu(gameView);
+
         btnStart.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View view) {
@@ -292,32 +332,53 @@ public class JqmqActivity extends Activity {
         );
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View view) {
-                                           edtFen.setText(R.string.txt_info_working);
-                                           playSound(GameView.RESP_CLICK, 0);
-                                       }
-                                   }
-        );
+            @Override
+            public void onClick(View v) {
+                playSound(GameView.RESP_CLICK, 0);
 
-        btnOpen.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View view) {
-                                           edtFen.setText(R.string.wokao);
-                                           playSound(GameView.RESP_WIN, 0);
-                                       }
-                                   }
-        );
+                PopupMenu popup = new PopupMenu(JqmqActivity.this, btnMenu);
+                popup.getMenuInflater().inflate(R.menu.pmenu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menucopyfen:
+                                Toast.makeText(JqmqActivity.this, getString(R.string.btn_txt_copyfen), Toast.LENGTH_LONG).show();
+                                edtFen.setText(GameView.pos.toFen());
+                                break;
+                            case R.id.menupastefen:
+                                Toast.makeText(JqmqActivity.this, getString(R.string.btn_txt_pastefen), Toast.LENGTH_LONG).show();
+                                GameView.pos.fromFen(edtFen.getText().toString());
+                                GameView.isvisible = 2;
+                                btnShowPiece.setText(R.string.btn_txt_hideboard);
+                                gameView.invalidate();
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+            }
+        });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View view) {
-                                           edtFen.setText(R.string.txt_info_working);
-                                           playSound(GameView.RESP_CLICK, 0);
-                                       }
-                                   }
-        );
-
+//        btnOpen.setOnClickListener(new View.OnClickListener() {
+//                                       @Override
+//                                       public void onClick(View view) {
+//                                           edtFen.setText(R.string.wokao);
+//                                           playSound(GameView.RESP_CHECK2, 0);
+//                                       }
+//                                   }
+//        );
+//
+//        btnSave.setOnClickListener(new View.OnClickListener() {
+//                                       @Override
+//                                       public void onClick(View view) {
+//                                           edtFen.setText(R.string.txt_info_working);
+//                                           playSound(GameView.RESP_CLICK, 0);
+//                                       }
+//                                   }
+//        );
+//
         btnCopyfen.setOnClickListener(new View.OnClickListener() {
                                           @Override
                                           public void onClick(View view) {
@@ -373,11 +434,11 @@ public class JqmqActivity extends Activity {
         btnPrompt.setOnClickListener(new View.OnClickListener() {
                                          @Override
                                          public void onClick(View view) {
-                                             Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_SHORT).show();
+                                             Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_LONG).show();
                                              int mv = GameView.search.searchMain(100 << (1 << 1));
                                              GameView.pos.makeMove(mv);
                                              gameView.invalidate();
-                                             Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt), Toast.LENGTH_SHORT).show();
+                                             Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt), Toast.LENGTH_LONG).show();
                                              edtFen.setText(Integer.toHexString(mv));
                                              mv = GameView.search.searchMain(100 << (1 << 1));
                                              GameView.pos.makeMove(mv);
@@ -392,6 +453,7 @@ public class JqmqActivity extends Activity {
                 try {
                    if(GameView.pos.distance>=0)
                    {
+                       Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_undo), Toast.LENGTH_LONG).show();
                        GameView.pos.undoMakeMove();
                        gameView.invalidate();
                    }

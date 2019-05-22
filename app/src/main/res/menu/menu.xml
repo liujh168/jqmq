@@ -1,13 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menufileopen"
-        android:title="@string/menu_file_open"/>
+        android:icon="@drawable/rk"
+        android:showAsAction="always"
+        android:title="@string/menu_file_open" />
     <item
         android:id="@+id/menufilesave"
-        android:title="@string/menu_file_save"/>
+        android:icon="@drawable/ba"
+        android:showAsAction="always"
+        android:title="@string/menu_file_save" />
+
+    <item android:title="棋盘">
+        <menu>
+            <item
+                android:id="@+id/board_3d"
+                android:icon="@drawable/bb"
+                android:title="3D金色" />
+            <item
+                android:id="@+id/board_perfect"
+                android:icon="@drawable/rn"
+                android:title="白玉无瑕" />
+            <item
+                android:id="@+id/board_wood"
+                android:icon="@drawable/bc"
+                android:title="木质" />
+        </menu>
+    </item>
+
+    <item android:title="棋子">
+        <menu>
+            <item
+                android:id="@+id/piece_3d"
+                android:icon="@drawable/rb"
+                android:title="3D金色" />
+            <item
+                android:id="@+id/piece_perfect"
+                android:icon="@drawable/bn"
+                android:title="白玉无瑕" />
+            <item
+                android:id="@+id/piece_wood"
+                android:icon="@drawable/rc"
+                android:title="木质" />
+        </menu>
+    </item>
+
+    <item android:title="棋谱">
+        <menu>
+            <item
+                android:id="@+id/file_new"
+                android:alphabeticShortcut="n"
+                android:icon="@android:drawable/ic_input_add"
+                android:title="New" />
+            <item
+                android:id="@+id/file_open"
+                android:alphabeticShortcut="o"
+                android:icon="@android:drawable/ic_media_play"
+                android:title="Open" />
+            <item
+                android:id="@+id/file_save"
+                android:alphabeticShortcut="s"
+                android:icon="@android:drawable/ic_menu_save"
+                android:title="Save" />
+        </menu>
+    </item>
+    <item android:title="@string/txt_info_music">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/menu_music"
+                    android:icon="@android:drawable/ic_media_play"
+                    android:title="@string/txt_info_music" />
+                <item
+                    android:id="@+id/menu_music_stop"
+                    android:icon="@android:drawable/ic_media_pause"
+                    android:title="@string/txt_info_music_stop" />
+            </group>
+        </menu>
+    </item>
+
     <item
-        android:id="@+id/menu_sys_set"
-        android:title="@string/btn_txt_settings"/>
-    android:enabled="false"
+        android:id="@+id/menu_set"
+        android:icon="@drawable/icon"
+        android:title="@string/btn_txt_settings" />
 </menu>

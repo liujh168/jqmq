@@ -164,6 +164,13 @@ public class GameView extends View {
     }
 
     @Override
+    public void setOnLongClickListener(OnLongClickListener l) {
+        super.setOnLongClickListener(l);
+        playSound(RESP_ILLEGAL);
+        Toast.makeText(father, "棋盘长按事件发生了！", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int width = getMySize((int)imgX, widthMeasureSpec);

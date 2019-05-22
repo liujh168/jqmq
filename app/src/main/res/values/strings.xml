@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">下盲棋</string>
-    <string name="title_name">中国象棋盲棋辅助训练系统</string>
+    <string name="app_name">中国象棋盲棋辅助训练系统</string>
+    <string name="title_name">下盲棋</string>
 
     <string name="btn_txt_start">开始</string>
     <string name="btn_txt_menu">菜单</string>
@@ -22,12 +22,15 @@
     <string name="txt_start_fen">rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR</string>
     <string name="txt_hint_fen">这里可以输入标准的fen串</string>
 
-    <string name="btn_txt_settings">设置</string>
+    <string name="btn_txt_settings">系统设置</string>
     <string name="menu_file_open">打开棋谱</string>
     <string name="menu_file_save">保存棋谱</string>
     <string name="txt_info_working">正在努力开发之中......</string>
     <string name="txt_info_prompt_toast">电脑给你支招，思考中......</string>
     <string name="txt_info_prompt">电脑提示最佳着法，不管你信不信，反正我信了</string>
     <string name="txt_info_undo">落子无悔大丈夫，下不为例哦</string>
-    <string name="txt_info_showhide">切换显示隐患棋盘棋子画面</string>
+    <string name="txt_info_showhide">显示或隐藏棋盘棋子</string>
+    <string name="txt_info_music">背景音乐</string>
+    <string name="txt_info_music_on">背景音乐开</string>
+    <string name="txt_info_music_stop">背景音乐关</string>
 </resources>

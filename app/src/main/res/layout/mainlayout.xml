@@ -36,31 +36,29 @@
 
         <Button
             android:id="@+id/btnstart"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_start" />
 
         <Button
-            android:id="@+id/btnopen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_txt_open" />
-
-        <Button
             android:id="@+id/btncopyfen"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_copyfen" />
 
         <Button
             android:id="@+id/btnshowpiece"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_showboard" />
 
         <Button
             android:id="@+id/btnundo"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_undo" />
     </LinearLayout>
@@ -73,31 +71,29 @@
 
         <Button
             android:id="@+id/btnmenu"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_menu" />
 
         <Button
-            android:id="@+id/btnsave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_txt_save" />
-
-        <Button
             android:id="@+id/btnpastefen"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_pastefen" />
 
         <Button
             android:id="@+id/btnprompt"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_prompt" />
 
         <Button
             android:id="@+id/btnreturn"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/btn_txt_return" />
     </LinearLayout>
