@@ -3,14 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menufileopen"
-        android:icon="@drawable/rk"
-        android:showAsAction="always"
-        android:title="@string/menu_file_open" />
+        android:icon="@android:drawable/ic_input_delete"
+        android:showAsAction="always"/>
     <item
         android:id="@+id/menufilesave"
-        android:icon="@drawable/ba"
-        android:showAsAction="always"
-        android:title="@string/menu_file_save" />
+        android:icon="@android:drawable/ic_input_get"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/menufileno"
+        android:icon="@android:drawable/ic_input_add"
+        android:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menufileno1"
+        android:icon="@drawable/ra"
+        android:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menufileno2"
+        android:icon="@drawable/bk"
+        android:showAsAction="always"/>
 
     <item android:title="棋盘">
         <menu>

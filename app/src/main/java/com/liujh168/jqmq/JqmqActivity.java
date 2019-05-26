@@ -97,12 +97,36 @@ public class JqmqActivity extends Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-
         MenuInflater inflator = new MenuInflater(this);
         inflator.inflate(R.menu.pmenu, menu);
         menu.setHeaderTitle("棋盘上下文菜单");
+    }
+
+    //主菜单动作
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_music:
+                playSound(GameView.RESP_BG, 1);
+                break;
+            case R.id.menu_music_stop:
+                soundPool.stop(GameView.RESP_BG);
+                break;
+            default:
+                Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
+                return super.onOptionsItemSelected(item);
+        }
+        playSound(GameView.RESP_CLICK, 0);
+        return true;
     }
 
     //上下文菜单被点击是触发该方法
@@ -116,41 +140,8 @@ public class JqmqActivity extends Activity {
                 Toast.makeText(this, R.string.btn_txt_pastefen, Toast.LENGTH_LONG).show();
                 break;
             default:
-                Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_LONG).show();
-
-        }
-        playSound(GameView.RESP_CLICK, 0);
-        return true;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    //主菜单动作
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menufileopen:
-                Toast.makeText(this, R.string.menu_file_open, Toast.LENGTH_LONG).show();
+                Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.menufilesave:
-                Toast.makeText(this, R.string.menu_file_save, Toast.LENGTH_LONG).show();
-                break;
-            case R.id.menu_music:
-                playSound(GameView.RESP_BG, 1);
-                Toast.makeText(this, R.string.txt_info_music, Toast.LENGTH_LONG).show();
-                break;
-            case R.id.menu_music_stop:
-                soundPool.stop(GameView.RESP_BG);
-                Toast.makeText(this, R.string.txt_info_music_stop, Toast.LENGTH_LONG).show();
-                break;
-            default:
-                Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_prompt_toast), Toast.LENGTH_LONG).show();
-                return super.onOptionsItemSelected(item);
         }
         playSound(GameView.RESP_CLICK, 0);
         return true;
