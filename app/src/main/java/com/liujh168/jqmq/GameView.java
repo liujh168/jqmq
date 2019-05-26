@@ -8,12 +8,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.io.File;
@@ -28,20 +32,22 @@ import static java.util.concurrent.locks.Lock.*;
 
 import com.liujh168.jqmq.Position;
 
-public class GameView extends View {
-    
+public class GameView extends View implements View.OnTouchListener {
+
+    private GestureDetector mGestureDetector;
+
     public static float screen_height;         //screen hight，从其它模块得到。不变的参数
     public static float screen_width;          //screen screen_width
 
     //    原始棋盘图参数，从属性得来
-    public static float board_width = 560f ;            //棋盘的大小
+    public static float board_width = 560f;            //棋盘的大小
     public static float board_height = 646f;
-    public static float board_ox = 53.0f ;              //左上角棋子位置（相对于棋盘）
-    public static float board_oy = 71.0f ;
+    public static float board_ox = 53.0f;              //左上角棋子位置（相对于棋盘）
+    public static float board_oy = 71.0f;
     private static float board_dd = 56f;                //棋盘格大小
 
-    public static float xZoom = screen_width/board_width;     //要充满屏幕的缩放比例
-    public static float yZoom = screen_height/board_height;
+    public static float xZoom = screen_width / board_width;     //要充满屏幕的缩放比例
+    public static float yZoom = screen_height / board_height;
 
     public static float boardWidth = board_width * xZoom;          //棋盘的大小
     public static float boardHeight = board_height * yZoom;
@@ -49,12 +55,13 @@ public class GameView extends View {
     public static float boardOY = board_oy * yZoom;
     private static float SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
 
-    public static float imgX = (screen_width-boardWidth*xZoom)/2;     //棋盘图像的起始坐标
-    public static float imgY = (screen_width-boardHeight*yZoom)/2;
-    int viewLeft=0,         viewTop=0;                               //棋盘view的位置
-    public static int isvisible = 2;                                    //控制棋盘棋子是否显示
+    public static float imgX = (screen_width - boardWidth * xZoom) / 2;     //棋盘图像的起始坐标
+    public static float imgY = (screen_width - boardHeight * yZoom) / 2;
+    int viewLeft = 0, viewTop = 0;                               //棋盘view的位置
+    public static int isvisible = 2;                                 //控制棋盘棋子是否显示
 
-    public static boolean isnoPlaySound = true;//是否播放声音
+    public static boolean isnoPlaySound = true; //是否播放声音
+    public static boolean isBoardEdit = false;  //是否棋盘编辑状态
 
     public static final int RESP_CLICK = 0;
     public static final int RESP_ILLEGAL = 1;
@@ -69,7 +76,7 @@ public class GameView extends View {
     public static final int RESP_LOSS = 10;
     public static final int RESP_BG = 11;          //背景音乐
 
-    private String resultMessage="";
+    private String resultMessage = "";
     private static final String[] PIECE_NAME = {
             null, null, null, null, null, null, null, null,
             "rk", "ra", "rb", "rn", "rr", "rc", "rp", null,
@@ -105,7 +112,7 @@ public class GameView extends View {
 
     JqmqActivity father;
 
-    public  static Position pos;
+    public static Position pos;
     public static Search search;
 
     private Paint paint;
@@ -121,12 +128,12 @@ public class GameView extends View {
 
     public GameView(Context context) {
         super(context);
-        this.father=(JqmqActivity) context;
+        this.father = (JqmqActivity) context;
     }
 
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.father=(JqmqActivity)context;
+        this.father = (JqmqActivity) context;
 
         TypedArray boardattrs = context.obtainStyledAttributes(attrs, R.styleable.GameView);
         board_ox = boardattrs.getInteger(R.styleable.GameView_boardox, 53);     //左上角棋子位置（相对于棋盘）
@@ -136,15 +143,15 @@ public class GameView extends View {
         board_dd = boardattrs.getInteger(R.styleable.GameView_boarddd, 56);
         isvisible = boardattrs.getInteger(R.styleable.GameView_isVisible, 0);
         currentFen = boardattrs.getString(R.styleable.GameView_fen);
-        int boardbg= boardattrs.getColor(R.styleable.GameView_boardbg, Color.RED);
+        int boardbg = boardattrs.getColor(R.styleable.GameView_boardbg, Color.RED);
         int boardline = boardattrs.getColor(R.styleable.GameView_boardline, Color.RED);
         boardattrs.recycle();//TypedArray对象回收
-        Log.d(TAG, "GameView: board_ox="+board_ox);
-        Log.d(TAG, "GameView: board_oy="+board_oy);
-        Log.d(TAG, "GameView: board_dd="+board_dd);
-        Log.d(TAG, "GameView: board_width="+board_width);
-        Log.d(TAG, "GameView: board_height="+board_height);
-        Log.d(TAG, "GameView: board_fen="+currentFen);
+        Log.d(TAG, "GameView: board_ox=" + board_ox);
+        Log.d(TAG, "GameView: board_oy=" + board_oy);
+        Log.d(TAG, "GameView: board_dd=" + board_dd);
+        Log.d(TAG, "GameView: board_width=" + board_width);
+        Log.d(TAG, "GameView: board_height=" + board_height);
+        Log.d(TAG, "GameView: board_fen=" + currentFen);
 
         initChessViewFinal();   //更新相关绘图参数
 
@@ -161,62 +168,68 @@ public class GameView extends View {
         flipped = false;
         thinking = false;
         int handicap = 0, level = 1, board = 0, pieces = 0, music = 8;
-    }
 
-    @Override
-    public void setOnLongClickListener(OnLongClickListener l) {
-        super.setOnLongClickListener(l);
-        playSound(RESP_ILLEGAL);
-        Toast.makeText(father, "棋盘长按事件发生了！", Toast.LENGTH_LONG).show();
+        mGestureDetector = new GestureDetector(new gestureListener()); //使用派生自OnGestureListener
+        setOnTouchListener(this);
+        setFocusable(true);
+        setClickable(true);
+       // setLongClickable(true);
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int width = getMySize((int)imgX, widthMeasureSpec);
-        int height = getMySize((int)imgY, heightMeasureSpec);
-        height = (int)((width/9)*10 + board_dd*0.8f) ;
+        int width = getMySize((int) imgX, widthMeasureSpec);
+        int height = getMySize((int) imgY, heightMeasureSpec);
+        height = (int) ((width / 9) * 10 + board_dd * 0.8f);
         setMeasuredDimension(width, height);
-        viewLeft=getLeft();
-        viewTop=getTop();
-        Log.d("测量 GameView","view_width: " + width + "   view_height: " + height);
-        Log.d("测量 GameView","viewLeft=" + viewLeft + "   viewTop=" + viewTop);
+        viewLeft = getLeft();
+        viewTop = getTop();
+        Log.d("测量 GameView", "view_width: " + width + "   view_height: " + height);
+        Log.d("测量 GameView", "viewLeft=" + viewLeft + "   viewTop=" + viewTop);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        float currentX = e.getX();
-        float currentY = e.getY();
-        int action = e.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                if (!thinking) {
-                    currentX = e.getX() - (boardOX - SQUARE_SIZE/2);
-                    currentY = e.getY() - (boardOY - SQUARE_SIZE/2);
-                    int x = Util.MIN_MAX(0, (int) (currentX / SQUARE_SIZE), 8);
-                    int y = Util.MIN_MAX(0, (int) (currentY / SQUARE_SIZE), 9);
-                    int currsq = Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP);
-//                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
-                    clickSquare(currsq);
-                }
-                break;
-            case MotionEvent.ACTION_MOVE:
-                break;
-            case MotionEvent.ACTION_UP:
-                break;
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent e) {
+////        super(e);
+//        float currentX = e.getX();
+//        float currentY = e.getY();
+//        int action = e.getAction();
+//        switch (action) {
+//            case MotionEvent.ACTION_DOWN:
+//                if (!thinking) {
+//                    currentX = e.getX() - (boardOX - SQUARE_SIZE / 2);
+//                    currentY = e.getY() - (boardOY - SQUARE_SIZE / 2);
+//                    int x = Util.MIN_MAX(0, (int) (currentX / SQUARE_SIZE), 8);
+//                    int y = Util.MIN_MAX(0, (int) (currentY / SQUARE_SIZE), 9);
+//                    int currsq = Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP);
+////                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
+//                    if (!isBoardEdit) {
+//                        clickSquare(currsq);
+//                    } else {
+//                        clickSquareOnBoardEdit(currsq);
+//                    }
+//                }
+//
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                break;
+//        }
+//        return false;
+//    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if(isvisible == 0) {
+        if (isvisible == 0) {
             return;  //仅显示广告
         }
 
-        if(isvisible == 1) {
+        if (isvisible == 1) {
             canvas.drawBitmap(JqmqActivity.scaleToFit(imgBoard, xZoom), 0, 0, null);
             return;  //仅显示棋盘，不显示棋子
         }
@@ -229,14 +242,14 @@ public class GameView extends View {
                 int sq = Position.COORD_XY(x, y);
                 sq = (flipped ? Position.SQUARE_FLIP(sq) : sq);
                 int pc = pos.squares[sq];
-                float xx = boardOX + (x - Position.FILE_LEFT) * SQUARE_SIZE ;
-                float yy = boardOY + (y - Position.RANK_TOP) * SQUARE_SIZE ;
+                float xx = boardOX + (x - Position.FILE_LEFT) * SQUARE_SIZE;
+                float yy = boardOY + (y - Position.RANK_TOP) * SQUARE_SIZE;
                 if (pc > 0) {
-                    canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[pc], xZoom*1.15f), xx-SQUARE_SIZE/2, yy-SQUARE_SIZE/2, null);
+                    canvas.drawBitmap(JqmqActivity.scaleToFit(imgPieces[pc], xZoom * 1.15f), xx - SQUARE_SIZE / 2, yy - SQUARE_SIZE / 2, null);
                 }
-				if (sq == sqSelected || sq == Position.SRC(mvLast) || sq == Position.DST(mvLast)) {
-					canvas.drawBitmap(JqmqActivity.scaleToFit(imgSelected,xZoom), xx-SQUARE_SIZE/2, yy-SQUARE_SIZE/2, null);
-				}
+                if (sq == sqSelected || sq == Position.SRC(mvLast) || sq == Position.DST(mvLast)) {
+                    canvas.drawBitmap(JqmqActivity.scaleToFit(imgSelected, xZoom), xx - SQUARE_SIZE / 2, yy - SQUARE_SIZE / 2, null);
+                }
             }
         }
         lock.unlock();
@@ -299,10 +312,97 @@ public class GameView extends View {
             invalidate();
             playSound(response);
             if (!getResult()) {
-                Toast.makeText(father,resultMessage,Toast.LENGTH_LONG);
+                Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
                 thinking();
             }
         }
+    }
+
+    //摆棋状态的clicksquare.在退出摆棋状态时应该检查棋盘的正确性。
+    void clickSquareOnBoardEdit(int sq_) {
+        final int sq = (flipped ? Position.SQUARE_FLIP(sq_) : sq_);
+        int pc = pos.squares[sq];
+        if (pc != 0) {
+            if (sqSelected == sq) {
+                pos.squares[sq] = 0;
+                sqSelected = 0;
+            } else {
+                sqSelected = sq;
+            }
+            playSound(RESP_CLICK);
+        } else if (sqSelected > 0) {
+            pos.squares[sq] = pos.squares[sqSelected];
+            pos.squares[sqSelected] = 0;
+            sqSelected = 0;
+            playSound(RESP_CLICK);
+        } else {
+            //以下弹出棋子列表菜单
+            PopupMenu popup = new PopupMenu(father, this);
+            popup.getMenuInflater().inflate(R.menu.cmenu, popup.getMenu());
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.popmenurr:
+                            pos.squares[sq] = 8 + Position.PIECE_ROOK;
+                            Log.d(TAG, "onMenuItemClick: 红车");
+                            break;
+                        case R.id.popmenurn:
+                            pos.squares[sq] = 8 + Position.PIECE_KNIGHT;
+                            Log.d(TAG, "onMenuItemClick: 红马");
+                            break;
+                        case R.id.popmenurc:
+                            pos.squares[sq] = 8 + Position.PIECE_CANNON;
+                            Log.d(TAG, "onMenuItemClick: 红炮");
+                            break;
+                        case R.id.popmenurp:
+                            pos.squares[sq] = 8 + Position.PIECE_PAWN;
+                            Log.d(TAG, "onMenuItemClick: 红兵");
+                            break;
+                        case R.id.popmenurb:
+                            pos.squares[sq] = 8 + Position.PIECE_BISHOP;
+                            Log.d(TAG, "onMenuItemClick: 红相");
+                            break;
+                        case R.id.popmenura:
+                            pos.squares[sq] = 8 + Position.PIECE_ADVISOR;
+                            Log.d(TAG, "onMenuItemClick: 红仕");
+                            break;
+                        case R.id.popmenurk:
+                            pos.squares[sq] = 8 + Position.PIECE_KING;
+                            Log.d(TAG, "onMenuItemClick: 红帅");
+                            break;
+                        case R.id.popmenubr:
+                            pos.squares[sq] = 16 + Position.PIECE_ROOK;
+                            break;
+                        case R.id.popmenubn:
+                            pos.squares[sq] = 16 + Position.PIECE_KNIGHT;
+                            break;
+                        case R.id.popmenubc:
+                            pos.squares[sq] = 16 + Position.PIECE_CANNON;
+                            break;
+                        case R.id.popmenubp:
+                            pos.squares[sq] = 16 + Position.PIECE_PAWN;
+                            break;
+                        case R.id.popmenubb:
+                            pos.squares[sq] = 16 + Position.PIECE_BISHOP;
+                            break;
+                        case R.id.popmenuba:
+                            pos.squares[sq] = 16 + Position.PIECE_ADVISOR;
+                            break;
+                        case R.id.popmenubk:
+                            pos.squares[sq] = 16 + Position.PIECE_KING;
+                            break;
+                        default:
+                            pos.squares[sq] = 0;
+                            break;
+                    }
+                    invalidate();
+                    return true;
+                }
+            });
+            popup.show();
+        }
+        invalidate();
     }
 
     void thinking() {
@@ -325,7 +425,7 @@ public class GameView extends View {
                     @Override
                     public void run() {
                         invalidate();
-                        Toast.makeText(father,resultMessage,Toast.LENGTH_LONG);
+                        Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
                     }
                 });
                 thinking = false;
@@ -334,7 +434,7 @@ public class GameView extends View {
     }
 
     void playSound(int response) {
-        father.playSound(response,0);
+        father.playSound(response, 0);
     }
 
     /**
@@ -376,16 +476,16 @@ public class GameView extends View {
     }
 
     public static void initChessViewFinal() {
-        xZoom = screen_width/board_width;
-        yZoom = screen_height/board_height;
-        if(xZoom>yZoom){
+        xZoom = screen_width / board_width;
+        yZoom = screen_height / board_height;
+        if (xZoom > yZoom) {
             xZoom = yZoom;
-        }else{
-            yZoom=xZoom;
+        } else {
+            yZoom = xZoom;
         }
 
-        imgX = (screen_width - board_width* xZoom)/2;
-        imgY = (screen_height - board_height* yZoom)/2;
+        imgX = (screen_width - board_width * xZoom) / 2;
+        imgY = (screen_height - board_height * yZoom) / 2;
 
         boardOX = board_ox * xZoom;     //左上角棋子位置（相对于棋盘）
         boardOY = board_oy * yZoom;
@@ -445,6 +545,7 @@ public class GameView extends View {
             }
         });
     }
+
     //根据Position数据生成棋盘棋子图片(这个函数未使用，待调试）
     private void drawBoard() {
         Bitmap board = BitmapFactory.decodeResource(getResources(), R.drawable.board);
@@ -520,5 +621,97 @@ public class GameView extends View {
             e.printStackTrace();
         }
     }
-}
 
+    // 在onTouch()方法中，我们调用GestureDetector的onTouchEvent()方法，将捕捉到的MotionEvent交给GestureDetector
+    // 来分析是否有合适的callback函数来处理用户的手势
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        Log.i("GameView", "onTouch");
+        //Toast.makeText(father, "onTouch", Toast.LENGTH_LONG).show();
+        return mGestureDetector.onTouchEvent(event);
+    }
+
+    private class gestureListener implements GestureDetector.OnGestureListener {
+        // 用户轻触触摸屏，由1个MotionEvent ACTION_DOWN触发
+        public boolean onDown(MotionEvent e) {
+            Log.i("MyGesture", "onDownPress");
+            //Toast.makeText(father, "onDown", Toast.LENGTH_SHORT).show();
+
+//        super(e);
+            float currentX = e.getX();
+            float currentY = e.getY();
+            int action = e.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    if (!thinking) {
+                        currentX = e.getX() - (boardOX - SQUARE_SIZE / 2);
+                        currentY = e.getY() - (boardOY - SQUARE_SIZE / 2);
+                        int x = Util.MIN_MAX(0, (int) (currentX / SQUARE_SIZE), 8);
+                        int y = Util.MIN_MAX(0, (int) (currentY / SQUARE_SIZE), 9);
+                        int currsq = Position.COORD_XY(x + Position.FILE_LEFT, y + Position.RANK_TOP);
+//                    Log.d("点击选择的棋盘格为：",Integer.toHexString(currsq));
+                        if (!isBoardEdit) {
+                            clickSquare(currsq);
+                        } else {
+                            clickSquareOnBoardEdit(currsq);
+                        }
+                    }
+
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+            }
+            return false;
+
+
+            //return false;
+        }
+
+        //用户轻触触摸屏，尚未松开或拖动，由一个1个MotionEvent ACTION_DOWN触发
+        //注意和onDown()的区别，强调的是没有松开或者拖动的状态
+        // 而onDown也是由一个MotionEventACTION_DOWN触发的，但是他没有任何限制，
+        // 也就是说当用户点击的时候，首先MotionEventACTION_DOWN，onDown就会执行，
+        // 如果在按下的瞬间没有松开或者是拖动的时候onShowPress就会执行，如果是按下的时间超过瞬间
+        // （这块我也不太清楚瞬间的时间差是多少，一般情况下都会执行onShowPress），拖动了，就不执行onShowPress。
+        public void onShowPress(MotionEvent e) {
+            Log.i("MyGesture", "onShowPress");
+            //Toast.makeText(father, "onShowPress", Toast.LENGTH_SHORT).show();
+        }
+
+        // 用户（轻触触摸屏后）松开，由一个1个MotionEvent ACTION_UP触发
+        ///轻击一下屏幕，立刻抬起来，才会有这个触发
+        //从名子也可以看出,一次单独的轻击抬起操作,当然,如果除了Down以外还有其它操作,那就不再算是Single操作了,所以这个事件 就不再响应
+        public boolean onSingleTapUp(MotionEvent e) {
+            Log.i("MyGesture", "onSingleTapUp");
+           // Toast.makeText(father, "onSingleTapUp", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        // 用户按下触摸屏，并拖动，由1个MotionEvent ACTION_DOWN, 多个ACTION_MOVE触发
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                float distanceX, float distanceY) {
+            Log.i("MyGesture22", "onScroll:" + (e2.getX() - e1.getX()) + "   " + distanceX);
+            //Toast.makeText(father, "onScroll", Toast.LENGTH_LONG).show();
+            return true;
+        }
+
+        // 用户长按触摸屏，由多个MotionEvent ACTION_DOWN触发
+        public void onLongPress(MotionEvent e) {
+            Log.i("MyGesture", "onLongPress");
+            father.edtFen.setText("onLongPress");
+            //Toast.makeText(father, "onLongPress", Toast.LENGTH_LONG).show();
+        }
+
+        // 用户按下触摸屏、快速移动后松开，由1个MotionEvent ACTION_DOWN, 多个ACTION_MOVE, 1个ACTION_UP触发
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            Log.i("MyGesture", "onFling");
+            Toast.makeText(father, "onFling", Toast.LENGTH_LONG).show();
+            return true;
+        }
+    }
+
+    ;
+}

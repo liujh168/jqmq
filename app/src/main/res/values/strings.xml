@@ -21,10 +21,8 @@
     <string name="wokao">哇噻，下盲棋！</string>
     <string name="txt_start_fen">rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR</string>
     <string name="txt_hint_fen">这里可以输入标准的fen串</string>
-
     <string name="btn_txt_settings">系统设置</string>
-    <string name="menu_file_open">打开棋谱</string>
-    <string name="menu_file_save">保存棋谱</string>
+
     <string name="txt_info_working">正在努力开发之中......</string>
     <string name="txt_info_prompt_toast">电脑给你支招，思考中......</string>
     <string name="txt_info_prompt">电脑提示最佳着法，不管你信不信，反正我信了</string>
@@ -33,4 +31,53 @@
     <string name="txt_info_music">背景音乐</string>
     <string name="txt_info_music_on">背景音乐开</string>
     <string name="txt_info_music_stop">背景音乐关</string>
+
+    <string name="menu_main_file">文件</string>
+    <string name="menu_main_position">棋局</string>
+    <string name="menu_main_moves">着法</string>
+    <string name="menu_main_engine">引擎</string>
+    <string name="menu_main_interface">界面</string>
+    <string name="menu_main_view">视图</string>
+    <string name="menu_main_help">帮助</string>
+
+    <string name="menu_file_new">新建</string>
+    <string name="menu_file_open">打开</string>
+    <string name="menu_file_save">保存</string>
+    <string name="menu_file_saveas">另存为......</string>
+
+    <string name="menu_pos_edit">编辑棋局</string>
+    <string name="menu_pos_giveup">放弃编辑</string>
+    <string name="menu_pos_clear">清空盘面</string>
+    <string name="menu_pos_start">初始局面</string>
+
+    <string name="menu_pos_red_first">红方先手</string>
+    <string name="menu_pos_black_first">黑方先手</string>
+
+    <string name="menu_pos_left_right">左右翻转</string>
+    <string name="menu_pos_up_down">上下翻转</string>
+    <string name="menu_pos_rotate">旋转180°</string>
+
+    <string name="menu_pos_fen_copy">复制fen格式串</string>
+    <string name="menu_pos_fen_paste">粘贴fen格式串</string>
+
+    <string name="menu_engine_red">电脑执红</string>
+    <string name="menu_engine_black">电脑执黑</string>
+    <string name="menu_engine_local">本地计算</string>
+    <string name="menu_engine_remote">远程计算</string>
+    <string name="menu_engine_cloud">云库计算</string>
+    <string name="menu_engine_ponder">本地后台</string>
+    <string name="menu_engine_set">引擎设置</string>
+
+    <string name="menu_view_board">显示棋盘</string>
+    <string name="menu_view_piece">显示棋子</string>
+    <string name="menu_view_grid">显示棋盘格</string>
+    <string name="menu_view_digit">显示棋盘数字</string>
+    <string name="menu_view_background">显示棋盘背景</string>
+    <string name="menu_view_sound_move">音效</string>
+    <string name="menu_view_sound_backgroud">背景音乐</string>
+
+    <string name="menu_help_topic">帮助主题</string>
+    <string name="menu_help_newer">检查更新......</string>
+    <string name="menu_help_about">关于......</string>
+
 </resources>

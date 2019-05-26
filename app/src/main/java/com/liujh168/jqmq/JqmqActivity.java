@@ -55,6 +55,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class JqmqActivity extends Activity {
+    EditText edtFen;
+
     float screenHeight;
     float screenWidth;
     float ration;
@@ -62,20 +64,6 @@ public class JqmqActivity extends Activity {
     SoundPool soundPool;//声音池
     HashMap<Integer, Integer> soundPoolMap; //声音池中声音ID与自定义声音ID的Map    ImageView gameView;
     private Lock lock = new ReentrantLock();
-
-    Handler hd = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0:
-                    GotoContentView();
-                    break;
-                case 1:
-                    break;
-                default:
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,19 +84,25 @@ public class JqmqActivity extends Activity {
         setContentView(new WelcomeView(JqmqActivity.this));
     }
 
+    Handler hd = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    GotoContentView();
+                    break;
+                case 1:
+                    break;
+                default:
+            }
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
         return true;
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflator = new MenuInflater(this);
-        inflator.inflate(R.menu.pmenu, menu);
-        menu.setHeaderTitle("棋盘上下文菜单");
     }
 
     //主菜单动作
@@ -121,6 +115,14 @@ public class JqmqActivity extends Activity {
             case R.id.menu_music_stop:
                 soundPool.stop(GameView.RESP_BG);
                 break;
+            case R.id.menuposedit:
+                playSound(GameView.RESP_CLICK, 1);
+                GameView.isBoardEdit = !GameView.isBoardEdit;
+                Toast.makeText(JqmqActivity.this, GameView.isBoardEdit? (R.string.menu_pos_edit):(R.string.menu_pos_giveup), Toast.LENGTH_SHORT).show();
+                if(!GameView.isBoardEdit){
+//                    edtFen.setText(Integer.toHexString(mv));
+                }
+                break;
             default:
                 Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
                 return super.onOptionsItemSelected(item);
@@ -129,14 +131,22 @@ public class JqmqActivity extends Activity {
         return true;
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        MenuInflater inflator = new MenuInflater(this);
+        inflator.inflate(R.menu.pmenu, menu);
+        menu.setHeaderTitle("棋盘上下文菜单在此");
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
     //上下文菜单被点击是触发该方法
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.btncopyfen:
+            case R.id.menucopyfen:
                 Toast.makeText(this, R.string.btn_txt_copyfen, Toast.LENGTH_LONG).show();
                 break;
-            case R.id.btnpastefen:
+            case R.id.menupastefen:
                 Toast.makeText(this, R.string.btn_txt_pastefen, Toast.LENGTH_LONG).show();
                 break;
             default:
@@ -304,9 +314,9 @@ public class JqmqActivity extends Activity {
         Button btnPrompt = (Button) findViewById(R.id.btnprompt);
         Button btnUndo = (Button) findViewById(R.id.btnundo);
         final Button btnReturn = (Button) findViewById(R.id.btnreturn);
-        final EditText edtFen = (EditText) findViewById(R.id.edtInfofen);
+        edtFen = (EditText) findViewById(R.id.edtInfofen);
 
-        registerForContextMenu(gameView);
+       // registerForContextMenu(gameView);         //没调试好
 
         btnStart.setOnClickListener(new View.OnClickListener() {
                                         @Override
@@ -326,50 +336,9 @@ public class JqmqActivity extends Activity {
             @Override
             public void onClick(View v) {
                 playSound(GameView.RESP_CLICK, 0);
-
-                PopupMenu popup = new PopupMenu(JqmqActivity.this, btnMenu);
-                popup.getMenuInflater().inflate(R.menu.pmenu, popup.getMenu());
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.menucopyfen:
-                                Toast.makeText(JqmqActivity.this, getString(R.string.btn_txt_copyfen), Toast.LENGTH_LONG).show();
-                                edtFen.setText(GameView.pos.toFen());
-                                break;
-                            case R.id.menupastefen:
-                                Toast.makeText(JqmqActivity.this, getString(R.string.btn_txt_pastefen), Toast.LENGTH_LONG).show();
-                                GameView.pos.fromFen(edtFen.getText().toString());
-                                GameView.isvisible = 2;
-                                btnShowPiece.setText(R.string.btn_txt_hideboard);
-                                gameView.invalidate();
-                                break;
-                        }
-                        return true;
-                    }
-                });
-                popup.show();
             }
         });
 
-//        btnOpen.setOnClickListener(new View.OnClickListener() {
-//                                       @Override
-//                                       public void onClick(View view) {
-//                                           edtFen.setText(R.string.wokao);
-//                                           playSound(GameView.RESP_CHECK2, 0);
-//                                       }
-//                                   }
-//        );
-//
-//        btnSave.setOnClickListener(new View.OnClickListener() {
-//                                       @Override
-//                                       public void onClick(View view) {
-//                                           edtFen.setText(R.string.txt_info_working);
-//                                           playSound(GameView.RESP_CLICK, 0);
-//                                       }
-//                                   }
-//        );
-//
         btnCopyfen.setOnClickListener(new View.OnClickListener() {
                                           @Override
                                           public void onClick(View view) {

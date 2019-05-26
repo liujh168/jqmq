@@ -1,89 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menufileopen"
-        android:icon="@android:drawable/ic_input_delete"
-        android:showAsAction="always"/>
-    <item
-        android:id="@+id/menufilesave"
-        android:icon="@android:drawable/ic_input_get"
-        android:showAsAction="always"/>
-    <item
-        android:id="@+id/menufileno"
-        android:icon="@android:drawable/ic_input_add"
-        android:showAsAction="always"/>
 
     <item
-        android:id="@+id/menufileno1"
-        android:icon="@drawable/ra"
-        android:showAsAction="always"/>
-
+        android:id="@+id/menufilenew"
+        android:icon="@android:drawable/ic_menu_add"
+        android:showAsAction="always"
+        android:title="@string/menu_file_new" />
     <item
-        android:id="@+id/menufileno2"
+        android:id="@+id/menuposedit"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:showAsAction="always"
+        android:title="@string/menu_pos_edit" />
+    <item
+        android:id="@+id/menuposblackfirst"
         android:icon="@drawable/bk"
-        android:showAsAction="always"/>
+        android:showAsAction="always"
+        android:title="@string/menu_pos_black_first" />
+    <item
+        android:id="@+id/menu_music"
+        android:icon="@android:drawable/ic_media_play"
+        android:showAsAction="always"
+        android:title="@string/txt_info_music" />
 
-    <item android:title="棋盘">
+    <item android:title="@string/menu_main_file">
+        android:icon="@drawable/rk"
         <menu>
             <item
-                android:id="@+id/board_3d"
-                android:icon="@drawable/bb"
-                android:title="3D金色" />
+                android:id="@+id/menufileopen"
+                android:icon="@android:drawable/ic_btn_speak_now"
+                android:showAsAction="never"
+                android:title="@string/menu_file_open" />
             <item
-                android:id="@+id/board_perfect"
-                android:icon="@drawable/rn"
-                android:title="白玉无瑕" />
-            <item
-                android:id="@+id/board_wood"
-                android:icon="@drawable/bc"
-                android:title="木质" />
-        </menu>
-    </item>
-
-    <item android:title="棋子">
-        <menu>
-            <item
-                android:id="@+id/piece_3d"
-                android:icon="@drawable/rb"
-                android:title="3D金色" />
-            <item
-                android:id="@+id/piece_perfect"
-                android:icon="@drawable/bn"
-                android:title="白玉无瑕" />
-            <item
-                android:id="@+id/piece_wood"
-                android:icon="@drawable/rc"
-                android:title="木质" />
-        </menu>
-    </item>
-
-    <item android:title="棋谱">
-        <menu>
-            <item
-                android:id="@+id/file_new"
-                android:alphabeticShortcut="n"
-                android:icon="@android:drawable/ic_input_add"
-                android:title="New" />
-            <item
-                android:id="@+id/file_open"
-                android:alphabeticShortcut="o"
-                android:icon="@android:drawable/ic_media_play"
-                android:title="Open" />
-            <item
-                android:id="@+id/file_save"
-                android:alphabeticShortcut="s"
+                android:id="@+id/menufilesave"
                 android:icon="@android:drawable/ic_menu_save"
-                android:title="Save" />
+                android:showAsAction="never"
+                android:title="@string/menu_file_save" />
+            <item
+                android:id="@+id/menufilesaveas"
+                android:icon="@android:drawable/ic_menu_more"
+                android:showAsAction="never"
+                android:title="@string/menu_file_saveas" />
         </menu>
     </item>
-    <item android:title="@string/txt_info_music">
+
+    <item android:title="@string/menu_main_position">
+        <menu>
+            <item
+                android:id="@+id/menuposgiveup"
+                android:icon="@android:drawable/ic_input_delete"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_giveup" />
+            <item
+                android:id="@+id/menuposclear"
+                android:icon="@android:drawable/ic_input_get"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_clear" />
+            <item
+                android:id="@+id/menuposstart"
+                android:icon="@android:drawable/ic_input_add"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_start" />
+            <item
+                android:id="@+id/menuposredfirst"
+                android:icon="@android:drawable/ic_menu_edit"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_red_first" />
+            <item
+                android:id="@+id/menuposleftright"
+                android:icon="@android:drawable/ic_input_add"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_left_right" />
+            <item
+                android:id="@+id/menuposupdown"
+                android:icon="@android:drawable/ic_menu_share"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_up_down" />
+            <item
+                android:id="@+id/menuposrotate"
+                android:icon="@android:drawable/ic_menu_rotate"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_rotate" />
+            <item
+                android:id="@+id/menuposfencopy"
+                android:icon="@android:drawable/ic_menu_send"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_fen_copy" />
+            <item
+                android:id="@+id/menuposfenpaste"
+                android:icon="@android:drawable/ic_menu_recent_history"
+                android:showAsAction="never"
+                android:title="@string/menu_pos_fen_paste" />
+        </menu>
+    </item>
+
+    <item android:title="@string/menu_main_interface">
+            <item android:title="棋盘">
+                <menu>
+                    <item
+                        android:id="@+id/board_3d"
+                        android:icon="@drawable/bb"
+                        android:title="3D金色" />
+                    <item
+                        android:id="@+id/board_perfect"
+                        android:icon="@drawable/rn"
+                        android:title="白玉无瑕" />
+                    <item
+                        android:id="@+id/board_wood"
+                        android:icon="@drawable/bc"
+                        android:title="木质" />
+                </menu>
+            </item>
+            <item android:title="棋子">
+                <menu>
+                    <item
+                        android:id="@+id/piece_3d"
+                        android:icon="@drawable/rb"
+                        android:title="3D金色" />
+                    <item
+                        android:id="@+id/piece_perfect"
+                        android:icon="@drawable/bn"
+                        android:title="白玉无瑕" />
+                    <item
+                        android:id="@+id/piece_wood"
+                        android:icon="@drawable/rc"
+                        android:title="木质" />
+                </menu>
+            </item>
+    </item>
+
+
+    <item android:title="@string/menu_view_sound_move">
         <menu>
             <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/menu_music"
-                    android:icon="@android:drawable/ic_media_play"
-                    android:title="@string/txt_info_music" />
                 <item
                     android:id="@+id/menu_music_stop"
                     android:icon="@android:drawable/ic_media_pause"
@@ -94,6 +143,27 @@
 
     <item
         android:id="@+id/menu_set"
-        android:icon="@drawable/icon"
+        android:icon="@drawable/bk"
+        android:showAsAction="ifRoom"
         android:title="@string/btn_txt_settings" />
+
+    <item android:title="@string/menu_main_help">
+        <menu>
+            <item
+                android:id="@+id/menuhelptopic"
+                android:icon="@android:drawable/ic_menu_help"
+                android:showAsAction="never"
+                android:title="@string/menu_help_topic" />
+            <item
+                android:id="@+id/menuhelpnewer"
+                android:icon="@android:drawable/ic_menu_camera"
+                android:showAsAction="never"
+                android:title="@string/menu_help_newer" />
+            <item
+                android:id="@+id/menuhelpabout"
+                android:icon="@android:drawable/ic_menu_directions"
+                android:showAsAction="never"
+                android:title="@string/menu_help_about" />
+        </menu>
+    </item>
 </menu>
