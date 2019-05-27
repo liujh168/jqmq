@@ -20,10 +20,15 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,6 +36,8 @@ import static android.content.ContentValues.TAG;
 import static java.util.concurrent.locks.Lock.*;
 
 import com.liujh168.jqmq.Position;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class GameView extends View implements View.OnTouchListener {
 
@@ -107,6 +114,10 @@ public class GameView extends View implements View.OnTouchListener {
             "入门", "业余", "专业", "大师", "特级大师"
     };
 
+    static int bFromWhich;     //控制走法来源
+    static final int BMFROMCLOUD = 0;
+    static final int BMFROMLOCAL = 1;
+
     Bitmap[] imgPieces = new Bitmap[PIECE_NAME.length];
     Bitmap imgSelected, imgBoard, imgbrothers;
 
@@ -167,6 +178,8 @@ public class GameView extends View implements View.OnTouchListener {
         retractFen = currentFen;
         flipped = false;
         thinking = false;
+        bFromWhich = BMFROMLOCAL;
+        bFromWhich = BMFROMCLOUD;
         int handicap = 0, level = 1, board = 0, pieces = 0, music = 8;
 
         mGestureDetector = new GestureDetector(new gestureListener()); //使用派生自OnGestureListener
@@ -411,24 +424,31 @@ public class GameView extends View implements View.OnTouchListener {
             public void run() {
                 int mv = mvLast;
                 lock.lock();
-                mvLast = search.searchMain(100 << (level << 1));
-                pos.makeMove(mvLast);
-                lock.unlock();
-                int response = pos.inCheck() ? RESP_CHECK2 :
-                        pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
-                if (pos.captured()) {
-                    pos.setIrrev();
-                }
-                getResult(response);
-                //此处更新棋盘，在UI线程提示消息
-                father.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        invalidate();
-                        Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
+                mvLast = searchBestMove();
+                if (pos.legalMove(mvLast)) {
+                    pos.makeMove(mvLast);
+                    lock.unlock();
+                    int response = pos.inCheck() ? RESP_CHECK2 :
+                            pos.captured() ? RESP_CAPTURE2 : RESP_MOVE2;
+                    if (pos.captured()) {
+                        pos.setIrrev();
                     }
-                });
-                thinking = false;
+                    getResult(response);
+                    //此处更新棋盘，在UI线程提示消息
+                    father.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            father.edtFen.setText(resultMessage);
+                            Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
+                            invalidate();
+                        }
+                    });
+                    thinking = false;
+                }else{
+                    lock.unlock();
+                    playSound(RESP_ILLEGAL);
+                    thinking = false;
+                }
             }
         }.start();
     }
@@ -449,7 +469,7 @@ public class GameView extends View implements View.OnTouchListener {
      */
     boolean getResult(int response) {
         if (pos.isMate()) {
-            resultMessage = "response < 0 ? \"祝贺你取得胜利！\" : \"请再接再厉！\"";
+            resultMessage = response < 0 ? "祝贺你取得胜利！" : "请再接再厉！";
             playSound(response < 0 ? RESP_WIN : RESP_LOSS);
             return true;
         }
@@ -713,5 +733,76 @@ public class GameView extends View implements View.OnTouchListener {
         }
     }
 
-    ;
+    //从云库获取走法，主要是用于解残局
+    int searchBestMove(){
+        int mv=0;
+        HttpURLConnection connection=null;
+        BufferedReader reader=null;
+        String strquery="http://api.chessdb.cn:81/chessdb.php?action=querybest&board=";
+        String fenexample = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
+        fenexample = pos.toFen();
+        strquery = strquery+fenexample;
+        Log.d(TAG, "searchBestMove: 云库查询字符串"+strquery);
+        //String strquery="http://www.baidu.com";
+        switch(bFromWhich){
+            case BMFROMCLOUD:
+                try {
+                    URL url = new URL(strquery);
+                    connection=(HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(8000);
+                    InputStream in = connection.getInputStream();
+                    reader = new BufferedReader((new InputStreamReader(in)));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while( ( line=reader.readLine() )!=null ){
+                        response.append(line);
+                    }
+                    mv = iccs2Move(response.toString().substring(5,9));
+
+                    ShowResponse(response.toString());
+                    Log.d(TAG, "cloudBestMove: "+ response.toString().substring(5,9));
+                    Log.d(TAG, "cloudBestMove: " + Integer.toHexString(mv));
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }finally {
+                    if(reader!=null){
+                        try{
+                            reader.close();
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    if(connection!=null){
+                        connection.disconnect();
+                    }
+                }
+                break;
+            default:
+                mv = search.searchMain(100 << (level << 1));
+        }
+        return mv;
+    }
+
+    private void ShowResponse(final String response){
+        father.runOnUiThread(new Runnable(){
+            @Override
+            public void run(){
+                father.edtFen.setText(response);
+            }
+        });
+    }
+
+    /** ICCS表示转换为内部着法表示 */
+    private int iccs2Move(String strIccs) {
+        char[] cIccs = strIccs.toCharArray();
+        if (cIccs[0] < 'a' || cIccs[0] > 'i' || cIccs[1] < '0' || cIccs[1] > '9' ||
+                cIccs[2] < 'a' || cIccs[2] > 'i' || cIccs[3] < '0' || cIccs[3] > '9') {
+            return 0;
+        }
+        int sqSrc = pos.COORD_XY(cIccs[0] - 'a' + pos.FILE_LEFT, '9' + pos.RANK_TOP - cIccs[1]);
+        int sqDst = pos.COORD_XY(cIccs[2] - 'a' + pos.FILE_LEFT, '9' + pos.RANK_TOP - cIccs[3]);
+        return pos.MOVE(sqSrc, sqDst);
+    }
 }

@@ -115,6 +115,16 @@ public class JqmqActivity extends Activity {
             case R.id.menu_music_stop:
                 soundPool.stop(GameView.RESP_BG);
                 break;
+            case R.id.menuenginelocal:
+                GameView.bFromWhich= GameView.BMFROMLOCAL;
+                Toast.makeText(JqmqActivity.this, R.string.menu_engine_local, Toast.LENGTH_SHORT).show();
+                soundPool.stop(GameView.RESP_CLICK);
+                break;
+            case R.id.menuenginecloud:
+                GameView.bFromWhich= GameView.BMFROMCLOUD;
+                Toast.makeText(JqmqActivity.this, R.string.menu_engine_cloud, Toast.LENGTH_SHORT).show();
+                soundPool.stop(GameView.RESP_CLICK);
+                break;
             case R.id.menuposedit:
                 playSound(GameView.RESP_CLICK, 1);
                 GameView.isBoardEdit = !GameView.isBoardEdit;

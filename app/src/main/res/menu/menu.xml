@@ -130,6 +130,25 @@
     </item>
 
 
+    <item android:title="引擎">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/menuenginelocal"
+                    android:icon="@android:drawable/ic_menu_directions"
+                    android:title="@string/menu_engine_local" />
+                <item
+                    android:id="@+id/menuengineremote"
+                    android:icon="@android:drawable/ic_menu_more"
+                    android:title="@string/menu_engine_remote" />
+                <item
+                    android:id="@+id/menuenginecloud"
+                    android:icon="@android:drawable/ic_media_pause"
+                    android:title="@string/menu_engine_cloud" />
+            </group>
+        </menu>
+    </item>
+
     <item android:title="@string/menu_view_sound_move">
         <menu>
             <group android:checkableBehavior="single">
