@@ -3,29 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menufilenew"
-        android:icon="@android:drawable/ic_menu_add"
+        android:id="@+id/menumovestart"
+        android:icon="@drawable/start"
         android:showAsAction="always"
-        android:title="@string/menu_file_new" />
+        android:title="起始"/>
+
     <item
-        android:id="@+id/menuposedit"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:id="@+id/menumoveback"
+        android:icon="@drawable/back"
         android:showAsAction="always"
-        android:title="@string/menu_pos_edit" />
+        android:title="后退"/>
+
     <item
-        android:id="@+id/menuposblackfirst"
-        android:icon="@drawable/bk"
+        android:id="@+id/menumoveforward"
+        android:icon="@drawable/forward"
         android:showAsAction="always"
-        android:title="@string/menu_pos_black_first" />
+        android:title="前进"/>
+
     <item
-        android:id="@+id/menu_music"
-        android:icon="@android:drawable/ic_media_play"
+        android:id="@+id/menumoveend"
+        android:icon="@drawable/end"
         android:showAsAction="always"
-        android:title="@string/txt_info_music" />
+        android:title="结束"/>
 
     <item android:title="@string/menu_main_file">
         android:icon="@drawable/rk"
         <menu>
+            <item
+                android:id="@+id/menufilenew"
+                android:icon="@android:drawable/ic_menu_add"
+                android:showAsAction="ifRoom"
+                android:title="@string/menu_file_new" />
             <item
                 android:id="@+id/menufileopen"
                 android:icon="@android:drawable/ic_btn_speak_now"
@@ -47,6 +55,11 @@
     <item android:title="@string/menu_main_position">
         <menu>
             <item
+                android:id="@+id/menuposedit"
+                android:icon="@android:drawable/ic_menu_edit"
+                android:showAsAction="ifRoom"
+                android:title="@string/menu_pos_edit" />
+            <item
                 android:id="@+id/menuposgiveup"
                 android:icon="@android:drawable/ic_input_delete"
                 android:showAsAction="never"
@@ -66,6 +79,16 @@
                 android:icon="@android:drawable/ic_menu_edit"
                 android:showAsAction="never"
                 android:title="@string/menu_pos_red_first" />
+            <item
+                android:id="@+id/menuposblackfirst"
+                android:icon="@drawable/bk"
+                android:showAsAction="ifRoom"
+                android:title="@string/menu_pos_black_first" />
+            <item
+                android:id="@+id/menuposchageside"
+                android:icon="@drawable/rn"
+                android:showAsAction="ifRoom"
+                android:title="@string/menu_pos_change_side" />
             <item
                 android:id="@+id/menuposleftright"
                 android:icon="@android:drawable/ic_input_add"
@@ -98,15 +121,15 @@
             <item android:title="棋盘">
                 <menu>
                     <item
-                        android:id="@+id/board_3d"
+                        android:id="@+id/menuboard_3d"
                         android:icon="@drawable/bb"
                         android:title="3D金色" />
                     <item
-                        android:id="@+id/board_perfect"
+                        android:id="@+id/menuboard_perfect"
                         android:icon="@drawable/rn"
                         android:title="白玉无瑕" />
                     <item
-                        android:id="@+id/board_wood"
+                        android:id="@+id/menuboard_wood"
                         android:icon="@drawable/bc"
                         android:title="木质" />
                 </menu>
@@ -114,15 +137,15 @@
             <item android:title="棋子">
                 <menu>
                     <item
-                        android:id="@+id/piece_3d"
+                        android:id="@+id/menupiece_3d"
                         android:icon="@drawable/rb"
                         android:title="3D金色" />
                     <item
-                        android:id="@+id/piece_perfect"
+                        android:id="@+id/menupiece_perfect"
                         android:icon="@drawable/bn"
                         android:title="白玉无瑕" />
                     <item
-                        android:id="@+id/piece_wood"
+                        android:id="@+id/menupiece_wood"
                         android:icon="@drawable/rc"
                         android:title="木质" />
                 </menu>
@@ -152,6 +175,12 @@
     <item android:title="@string/menu_view_sound_move">
         <menu>
             <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/menu_music"
+                    android:icon="@android:drawable/ic_media_play"
+                    android:showAsAction="ifRoom"
+                    android:title="@string/txt_info_music" />
+
                 <item
                     android:id="@+id/menu_music_stop"
                     android:icon="@android:drawable/ic_media_pause"

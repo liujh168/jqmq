@@ -190,6 +190,20 @@ public class GameView extends View implements View.OnTouchListener {
 
     }
 
+    public void restart() {
+        currentFen=father.getString(R.string.txt_start_fen);
+        retractFen = currentFen;
+        pos.fromFen(currentFen);
+        isvisible = 2;
+        bFromWhich = BMFROMCLOUD;
+        sqSelected = mvLast = 0;
+        invalidate();
+        if (flipped && pos.sdPlayer == 0) {
+            thinking();
+        }
+        playSound(RESP_CLICK);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -438,8 +452,8 @@ public class GameView extends View implements View.OnTouchListener {
                     father.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            father.edtFen.setText(resultMessage);
-                            Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
+                            //father.edtFen.setText(resultMessage);
+                            //Toast.makeText(father, resultMessage, Toast.LENGTH_LONG);
                             invalidate();
                         }
                     });
@@ -469,7 +483,7 @@ public class GameView extends View implements View.OnTouchListener {
      */
     boolean getResult(int response) {
         if (pos.isMate()) {
-            resultMessage = response < 0 ? "祝贺你取得胜利！" : "请再接再厉！";
+            resultMessage = response < 0 ? "祝贺你取得胜利！" : "你输啦，请再接再厉！";
             playSound(response < 0 ? RESP_WIN : RESP_LOSS);
             return true;
         }
@@ -512,16 +526,6 @@ public class GameView extends View implements View.OnTouchListener {
         boardWidth = board_width * xZoom;          //棋盘的大小
         boardHeight = board_height * xZoom;
         SQUARE_SIZE = board_dd * xZoom;          //棋盘格大小
-    }
-
-    private void restart() {
-        pos.fromFen(currentFen);
-        retractFen = currentFen;
-        sqSelected = mvLast = 0;
-        invalidate();
-        if (flipped && pos.sdPlayer == 0) {
-            thinking();
-        }
     }
 
     private int getMySize(int defaultSize, int measureSpec) {
@@ -738,15 +742,15 @@ public class GameView extends View implements View.OnTouchListener {
         int mv=0;
         HttpURLConnection connection=null;
         BufferedReader reader=null;
-        String strquery="http://api.chessdb.cn:81/chessdb.php?action=querybest&board=";
-        String fenexample = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
-        fenexample = pos.toFen();
-        strquery = strquery+fenexample;
-        Log.d(TAG, "searchBestMove: 云库查询字符串"+strquery);
-        //String strquery="http://www.baidu.com";
         switch(bFromWhich){
             case BMFROMCLOUD:
                 try {
+                    String strquery="http://api.chessdb.cn:81/chessdb.php?action=querybest&board=";
+                    String fenexample = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
+                    fenexample = pos.toFen();
+                    strquery = strquery+fenexample;
+                    Log.d(TAG, "searchBestMove: 云库查询"+strquery);
+                    //String strquery="http://www.baidu.com";
                     URL url = new URL(strquery);
                     connection=(HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
@@ -759,11 +763,17 @@ public class GameView extends View implements View.OnTouchListener {
                     while( ( line=reader.readLine() )!=null ){
                         response.append(line);
                     }
-                    mv = iccs2Move(response.toString().substring(5,9));
-
+                    Log.d(TAG, "cloudBestMove: "+ response.toString());
                     ShowResponse(response.toString());
-                    Log.d(TAG, "cloudBestMove: "+ response.toString().substring(5,9));
+
+                    mv = iccs2Move(response.toString().substring(5,9));
                     Log.d(TAG, "cloudBestMove: " + Integer.toHexString(mv));
+
+                    if(mv==0) {
+                        bFromWhich = BMFROMLOCAL;
+                        mv = search.searchMain(100 << (level << 1));
+                        Log.d(TAG, "BestMove电脑切换本地引擎" + Integer.toHexString(mv));
+                    }
                 }catch (Exception e) {
                     e.printStackTrace();
                 }finally {
@@ -781,6 +791,9 @@ public class GameView extends View implements View.OnTouchListener {
                 break;
             default:
                 mv = search.searchMain(100 << (level << 1));
+                ShowResponse("localBestMove: " + Integer.toHexString(mv));
+                Log.d(TAG, "localBestMove: " + Integer.toHexString(mv));
+                break;
         }
         return mv;
     }

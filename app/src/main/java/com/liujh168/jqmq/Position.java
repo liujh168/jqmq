@@ -1045,6 +1045,21 @@ public class Position {
 		return 0;
 	}
 
+	void ChangeSide()  //老刘增加的函数，上下换边用
+	{
+		byte[] temp = new byte[256];
+		int  i;
+		for(i=0x33;i<=0xcb;i++)
+		{
+			temp[0xdc-i+0x22]=squares[i];
+		}
+		for(i=0x33;i<=0xcb;i++)
+		{
+			squares[i]=temp[i];
+		}
+		sdPlayer=1-sdPlayer;
+	}
+
 	public Position mirror() {
 		Position pos = new Position();
 		pos.clearBoard();

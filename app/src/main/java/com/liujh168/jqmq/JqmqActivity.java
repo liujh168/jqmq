@@ -1,6 +1,7 @@
 package com.liujh168.jqmq;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Intent.ACTION_VIEW;
 import static java.lang.Thread.sleep;
 
 import java.io.FileNotFoundException;
@@ -12,11 +13,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -54,8 +57,14 @@ import android.graphics.Paint;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.liujh168.jqmq.GameView.*;
+
 public class JqmqActivity extends Activity {
+
+    GameView gameView;
+
     EditText edtFen;
+    Button btnShowPiece;
 
     float screenHeight;
     float screenWidth;
@@ -108,9 +117,62 @@ public class JqmqActivity extends Activity {
     //主菜单动作
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        playSound(GameView.RESP_CLICK, 0);
         switch (item.getItemId()) {
+            case R.id.menuhelpnewer:
+            case R.id.menuhelptopic:
+            case R.id.menuhelpabout:
+                Intent intent =new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("http://www.liujh168.com/index.php/2019/05/29/xmq_manual/"));
+                startActivity(intent);
+                break;
+            case R.id.menuboard_3d:
+            case R.id.menuboard_perfect:
+            case R.id.menuboard_wood:
+            case R.id.menupiece_3d:
+            case R.id.menupiece_perfect:
+            case R.id.menupiece_wood:
+                Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menufilenew:
+            case R.id.menufileopen:
+            case R.id.menufilesave:
+            case R.id.menufilesaveas:
+                Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menuposfencopy:
+                edtFen.setText(GameView.pos.toFen());
+                break;
+            case R.id.menuposfenpaste:
+                GameView.pos.fromFen(edtFen.getText().toString());
+                GameView.isvisible = 2;
+                btnShowPiece.setText(R.string.btn_txt_hideboard);
+                gameView.invalidate();
+                break;
+            case R.id.menuposupdown:
+            case R.id.menuposleftright:
+            case R.id.menuposrotate:
+                GameView.pos.ChangeSide();  //这样换边电脑下法不对了。约定红下黑上的呢
+                gameView.invalidate();
+                break;
+            case R.id.menuposredfirst:
+                GameView.pos.sdPlayer = 0;
+                break;
+            case R.id.menuposblackfirst:
+                GameView.pos.sdPlayer = 1;
+                break;
+            case R.id.menuposchageside:
+                GameView.pos.sdPlayer = 1 - GameView.pos.sdPlayer;
+                break;
+            case R.id.menuposstart:
+                GameView.pos.fromFen(getString(R.string.txt_start_fen));
+                gameView.invalidate();
+                break;
+            case R.id.menuposclear:
+                GameView.pos.fromFen(getString(R.string.txt_clear_fen));
+                gameView.invalidate();
+                break;
             case R.id.menu_music:
-                playSound(GameView.RESP_BG, 1);
                 break;
             case R.id.menu_music_stop:
                 soundPool.stop(GameView.RESP_BG);
@@ -118,27 +180,23 @@ public class JqmqActivity extends Activity {
             case R.id.menuenginelocal:
                 GameView.bFromWhich= GameView.BMFROMLOCAL;
                 Toast.makeText(JqmqActivity.this, R.string.menu_engine_local, Toast.LENGTH_SHORT).show();
-                soundPool.stop(GameView.RESP_CLICK);
                 break;
             case R.id.menuenginecloud:
                 GameView.bFromWhich= GameView.BMFROMCLOUD;
                 Toast.makeText(JqmqActivity.this, R.string.menu_engine_cloud, Toast.LENGTH_SHORT).show();
-                soundPool.stop(GameView.RESP_CLICK);
                 break;
             case R.id.menuposedit:
-                playSound(GameView.RESP_CLICK, 1);
-                GameView.isBoardEdit = !GameView.isBoardEdit;
-                Toast.makeText(JqmqActivity.this, GameView.isBoardEdit? (R.string.menu_pos_edit):(R.string.menu_pos_giveup), Toast.LENGTH_SHORT).show();
-                if(!GameView.isBoardEdit){
-//                    edtFen.setText(Integer.toHexString(mv));
-                }
+                GameView.isBoardEdit = true;
+                Toast.makeText(JqmqActivity.this, R.string.menu_pos_edit, Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menuposgiveup:
+                GameView.isBoardEdit = false;
+                Toast.makeText(JqmqActivity.this, R.string.menu_pos_giveup, Toast.LENGTH_SHORT).show();
                 break;
             default:
-                Toast.makeText(JqmqActivity.this, R.string.txt_info_working, Toast.LENGTH_SHORT).show();
-                return super.onOptionsItemSelected(item);
+                break;
         }
-        playSound(GameView.RESP_CLICK, 0);
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -312,7 +370,7 @@ public class JqmqActivity extends Activity {
     public void GotoContentView() {
         setContentView(R.layout.mainlayout);
 
-        final View gameView = (View) findViewById(R.id.gameview);
+        gameView = (GameView) findViewById(R.id.gameview);
 
         Button btnStart = (Button) findViewById(R.id.btnstart);
         final Button btnMenu = (Button) findViewById(R.id.btnmenu);
@@ -320,24 +378,18 @@ public class JqmqActivity extends Activity {
 //        Button btnSave = (Button) findViewById(R.id.btnsave);
         Button btnCopyfen = (Button) findViewById(R.id.btncopyfen);
         Button btnPastefen = (Button) findViewById(R.id.btnpastefen);
-        final Button btnShowPiece = (Button) findViewById(R.id.btnshowpiece);
+        btnShowPiece = (Button) findViewById(R.id.btnshowpiece);
         Button btnPrompt = (Button) findViewById(R.id.btnprompt);
         Button btnUndo = (Button) findViewById(R.id.btnundo);
         final Button btnReturn = (Button) findViewById(R.id.btnreturn);
         edtFen = (EditText) findViewById(R.id.edtInfofen);
 
        // registerForContextMenu(gameView);         //没调试好
-
         btnStart.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View view) {
-                                            GameView.pos.fromFen(getString(R.string.txt_start_fen));
-                                            GameView.isvisible = 2;
-                                            gameView.invalidate();
-                                            playSound(GameView.RESP_CLICK, 0);
-
+                                            gameView.restart();
                                             btnShowPiece.setText(R.string.btn_txt_hideboard);
-                                            //edtFen.setText(R.string.txt_start_fen);
                                         }
                                     }
         );
@@ -421,12 +473,18 @@ public class JqmqActivity extends Activity {
             @Override
             public void onClick(View view) {
                 try {
-                   if(GameView.pos.distance>=0)
-                   {
-                       Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_undo), Toast.LENGTH_LONG).show();
-                       GameView.pos.undoMakeMove();
-                       gameView.invalidate();
-                   }
+                    if(GameView.pos.distance>0)
+                    {
+                        Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_undo), Toast.LENGTH_LONG).show();
+                        GameView.pos.undoMakeMove();
+                        gameView.invalidate();
+                    }
+                    if(GameView.pos.distance>0)
+                    {
+                        Toast.makeText(JqmqActivity.this, getString(R.string.txt_info_undo), Toast.LENGTH_LONG).show();
+                        GameView.pos.undoMakeMove();
+                        gameView.invalidate();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -20,6 +20,7 @@
 
     <string name="wokao">哇噻，下盲棋！</string>
     <string name="txt_start_fen">rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR</string>
+    <string name="txt_clear_fen">2b1kab2/4a4/9/9/9/9/9/9/9/2BAKAB2</string>
     <string name="txt_hint_fen">这里可以输入标准的fen串</string>
     <string name="btn_txt_settings">系统设置</string>
 
@@ -46,12 +47,13 @@
     <string name="menu_file_saveas">另存为......</string>
 
     <string name="menu_pos_edit">编辑棋局</string>
-    <string name="menu_pos_giveup">放弃编辑</string>
+    <string name="menu_pos_giveup">结束编辑</string>
     <string name="menu_pos_clear">清空盘面</string>
     <string name="menu_pos_start">初始局面</string>
 
     <string name="menu_pos_red_first">红方先手</string>
     <string name="menu_pos_black_first">黑方先手</string>
+    <string name="menu_pos_change_side">交换先后手</string>
 
     <string name="menu_pos_left_right">左右翻转</string>
     <string name="menu_pos_up_down">上下翻转</string>
